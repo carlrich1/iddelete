@@ -148,7 +148,6 @@ def health():
     return jsonify(ok=True, users=n_users, exposures=n_exposures,
                    scanners=len(list_scanners()))
 
-
 # ----- Public client config ------------------------------------------------
 
 @bp.get("/config")
@@ -156,5 +155,5 @@ def config():
     """Public-safe config the frontend needs (e.g. CAPTCHA sitekey).
     Never include secrets here — this endpoint is unauthenticated."""
     return jsonify(
-        hcaptcha_sitekey=os.environ.get("HCAPTCHA_SITEKEY") or None,
+        turnstile_sitekey=os.environ.get("TURNSTILE_SITEKEY") or None,
     )

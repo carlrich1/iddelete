@@ -89,34 +89,38 @@ def reset_rate_limit_buckets() -> None:
 
 
 # ---------------------------------------------------------------------------
-# hCaptcha verification (server-side)
+# Cloudflare Turnstile verification (server-side)
 #
-# Free, privacy-friendly CAPTCHA. Sign up at https://hcaptcha.com and set
-# HCAPTCHA_SITEKEY (public, exposed via /api/config) and HCAPTCHA_SECRET
+# Free, privacy-friendly, no-puzzle CAPTCHA from Cloudflare. Sign up at
+# https://dash.cloudflare.com/?to=/:account/turnstile and set
+# TURNSTILE_SITEKEY (public, exposed via /api/config) and TURNSTILE_SECRET
 # (server-only). If either is missing, captcha verification is skipped —
 # convenient for local dev and gives you a kill switch in production.
+#
+# Wire-compatible with hCaptcha (same field names) so swapping back later
+# is a one-line change to the URL constant.
 # ---------------------------------------------------------------------------
 
-HCAPTCHA_VERIFY_URL = "https://api.hcaptcha.com/siteverify"
+TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
 
 def is_captcha_enabled() -> bool:
     return bool(
-        os.environ.get("HCAPTCHA_SITEKEY") and os.environ.get("HCAPTCHA_SECRET")
+        os.environ.get("TURNSTILE_SITEKEY") and os.environ.get("TURNSTILE_SECRET")
     )
 
 
-def verify_hcaptcha(token: str) -> tuple[bool, str | None]:
+def verify_captcha(token: str) -> tuple[bool, str | None]:
     """Returns (ok, error_code). When captcha is disabled, returns (True, None)
-    so callers can use ``if not verify_hcaptcha(t)[0]: ...`` unconditionally."""
+    so callers can use ``if not verify_captcha(t)[0]: ...`` unconditionally."""
     if not is_captcha_enabled():
         return True, None
     if not token:
         return False, "captcha_missing"
-    secret = os.environ.get("HCAPTCHA_SECRET", "")
+    secret = os.environ.get("TURNSTILE_SECRET", "")
     try:
         resp = requests.post(
-            HCAPTCHA_VERIFY_URL,
+            TURNSTILE_VERIFY_URL,
             data={
                 "secret": secret,
                 "response": token,
@@ -126,9 +130,13 @@ def verify_hcaptcha(token: str) -> tuple[bool, str | None]:
         )
         body = resp.json() if resp.ok else {}
     except Exception as e:
-        log.warning("hCaptcha verification request failed: %s", e)
+        log.warning("Turnstile verification request failed: %s", e)
         return False, "captcha_unreachable"
     if body.get("success"):
         return True, None
     codes = body.get("error-codes") or []
-    return False, "captcha_invalid:" + ",".join(codes) if codes else "captcha_invalid"
+    return False, ("captcha_invalid:" + ",".join(codes)) if codes else "captcha_invalid"
+
+
+# Backwards-compat alias so auth.py keeps importing the old name.
+verify_hcaptcha = verify_captcha

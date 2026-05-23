@@ -82,8 +82,8 @@
         <label for="agree" style="font-weight:400">I agree to the <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy Policy</a>, and I authorize ID Delete to submit removal requests on my behalf.</label>
       </div>
 
-      <!-- hCaptcha widget loads here only if HCAPTCHA_SITEKEY is configured server-side -->
-      <div id="hcaptcha-slot" style="margin:12px 0;"></div>
+      <!-- Cloudflare Turnstile widget loads here only if TURNSTILE_SITEKEY is configured server-side -->
+      <div id="captcha-slot" style="margin:12px 0;"></div>
 
       <button class="btn btn-primary btn-block btn-lg" type="submit">Run my free scan →</button>
 
@@ -95,17 +95,17 @@
 <script src="js/app.js"></script>
 <script src="js/api.js"></script>
 <script>
-  // Conditionally load hCaptcha if the server reports a sitekey
+  // Conditionally load Cloudflare Turnstile if the server reports a sitekey
   (async () => {
     try {
       await window.eyBackend.ready;
       const cfg = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
-      const sk = cfg.hcaptcha_sitekey;
+      const sk = cfg.turnstile_sitekey;
       if (!sk) return;
-      const slot = document.getElementById('hcaptcha-slot');
-      slot.innerHTML = `<div class="h-captcha" data-sitekey="${sk}"></div>`;
+      const slot = document.getElementById('captcha-slot');
+      slot.innerHTML = `<div class="cf-turnstile" data-sitekey="${sk}" data-appearance="always"></div>`;
       const s = document.createElement('script');
-      s.src = 'https://js.hcaptcha.com/1/api.js';
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
       s.async = true; s.defer = true;
       document.head.appendChild(s);
     } catch (_) {}
@@ -130,9 +130,60 @@
     await window.eyBackend.ready;
     const submitBtn = e.target.querySelector('button[type=submit]');
     submitBtn.disabled = true; submitBtn.textContent = 'Running scan…';
-    // Grab the hCaptcha token if the widget is present
+
+    // Grab the Turnstile token if the widget is present.
+    // Turnstile auto-injects a hidden input named "cf-turnstile-response"; we also
+    // try window.turnstile.getResponse() in case the script hasn't auto-bound yet.
     let captcha_token = '';
     try {
-      if (window.hcaptcha) {
-        const tok = window.hcaptcha.getResponse();
-        if 
+      const hidden = document.querySelector('input[name="cf-turnstile-response"]');
+      if (hidden && hidden.value) captcha_token = hidden.value;
+      if (!captcha_token && window.turnstile) {
+        captcha_token = window.turnstile.getResponse() || '';
+      }
+      const widget = document.querySelector('.cf-turnstile');
+      if (widget && !captcha_token) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Run my free scan →';
+        alert('Please complete the CAPTCHA challenge to continue.');
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      await window.eyBackend.signup({
+        name: document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        plan,
+        captcha_token,
+      });
+      window.location.href = 'dashboard.html?welcome=1';
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Run my free scan →';
+      if (window.turnstile) { try { window.turnstile.reset(); } catch(_) {} }
+      const code = err.message || '';
+      const msg = code === 'email_in_use' ? 'That email is already registered.' :
+                  code === 'password_too_short' ? 'Password must be at least 8 characters.' :
+                  code === 'invalid_email' ? 'Please enter a valid email.' :
+                  code === 'rate_limited' ? 'Too many signup attempts. Please wait 15 minutes and try again.' :
+                  code.startsWith('captcha_') ? 'CAPTCHA verification failed. Please try again.' :
+                  'Signup failed. Please try again.';
+      alert(msg);
+    }
+  });
+</script>
+
+<script>
+  // Register the service worker in production-ish contexts (not file://)
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
