@@ -31,8 +31,11 @@
 
 <section style="padding: 24px 0 80px;">
   <div class="form-card" style="max-width:560px">
-    <h1>Start your free scan</h1>
-    <p class="sub">90 seconds, no credit card. We'll show you which brokers have your info before you decide whether to subscribe.</p>
+    <div class="signup-hero">
+      <div class="signup-hero-line">Start your free scan</div>
+      <div class="signup-hero-line">No credit card</div>
+      <div class="signup-hero-line">90 seconds to see which brokers have your info</div>
+    </div>
 
     <form id="signup-form">
       <div class="form-row">
@@ -58,22 +61,6 @@
             <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
             <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
           </select>
-        </div>
-      </div>
-
-      <label style="margin-top:8px;">Pick a plan (you only pay if you decide to continue)</label>
-      <div class="tier-picker" id="tier-picker">
-        <div class="tier-option" data-plan="personal">
-          <div><div class="t-name">Personal</div><div class="t-desc">1 person · 200+ brokers</div></div>
-          <div class="t-price">$9/mo</div>
-        </div>
-        <div class="tier-option selected" data-plan="family">
-          <div><div class="t-name">Family <span style="background:var(--brand);color:white;font-size:.7rem;padding:2px 8px;border-radius:999px;margin-left:6px">Popular</span></div><div class="t-desc">Up to 4 people · 200+ brokers</div></div>
-          <div class="t-price">$19/mo</div>
-        </div>
-        <div class="tier-option" data-plan="pro">
-          <div><div class="t-name">Pro</div><div class="t-desc">Up to 4 · 500+ brokers · Weekly scans</div></div>
-          <div class="t-price">$29/mo</div>
         </div>
       </div>
 
@@ -111,18 +98,10 @@
     } catch (_) {}
   })();
 
-  // Tier picker
-  const picker = document.getElementById('tier-picker');
-  let plan = (new URLSearchParams(location.search).get('plan')) || 'family';
-  function highlight() {
-    picker.querySelectorAll('.tier-option').forEach(o => {
-      o.classList.toggle('selected', o.dataset.plan === plan);
-    });
-  }
-  picker.querySelectorAll('.tier-option').forEach(o => {
-    o.addEventListener('click', () => { plan = o.dataset.plan; highlight(); });
-  });
-  highlight();
+  // Plan choice is deferred until after the scan results — show on the
+  // dashboard once the user can see the value first. We start everyone on
+  // the trial 'family' default; they'll pick a real plan later.
+  const plan = 'family';
 
   // Submit
   document.getElementById('signup-form').addEventListener('submit', async (e) => {

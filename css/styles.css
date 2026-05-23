@@ -499,3 +499,22 @@ td.muted { color: var(--slate); }
 html {
   touch-action: manipulation;
 }
+
+/* Signup-page hero: three equal-weight headline lines stacked vertically. */
+.signup-hero {
+  margin: 0 0 28px;
+}
+.signup-hero-line {
+  font-size: 1.65rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+  letter-spacing: -.01em;
+  margin-bottom: 10px;
+}
+.signup-hero-line:last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 540px) {
+  .signup-hero-line { font-size: 1.4rem; }
+}

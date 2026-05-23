@@ -54,6 +54,33 @@
       <div class="stat"><div class="label">Removed so far</div><div class="val" id="statGone">—</div><div class="delta good">we keep watching</div></div>
     </div>
 
+    <div id="plan-picker-card" class="table-card mb-2" style="display:none;border:2px solid var(--brand);">
+      <div class="table-head">
+        <h2 style="margin:0;">Now pick a plan to keep us going</h2>
+        <span class="muted" style="font-size:.85rem;">We'll keep monitoring every month so brokers can't quietly re-add you.</span>
+      </div>
+      <div style="padding: 22px;">
+        <div class="tier-picker" id="dash-tier-picker">
+          <div class="tier-option" data-plan="personal">
+            <div><div class="t-name">Personal</div><div class="t-desc">1 person &middot; 200+ brokers</div></div>
+            <div class="t-price">$9/mo</div>
+          </div>
+          <div class="tier-option selected" data-plan="family">
+            <div><div class="t-name">Family <span style="background:var(--brand);color:white;font-size:.7rem;padding:2px 8px;border-radius:999px;margin-left:6px">Popular</span></div><div class="t-desc">Up to 4 people &middot; 200+ brokers</div></div>
+            <div class="t-price">$19/mo</div>
+          </div>
+          <div class="tier-option" data-plan="pro">
+            <div><div class="t-name">Pro</div><div class="t-desc">Up to 4 &middot; 500+ brokers &middot; Weekly scans</div></div>
+            <div class="t-price">$29/mo</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:18px;">
+          <span class="muted" style="font-size:.9rem;">You won't be charged until your free trial ends.</span>
+          <a id="plan-continue" href="billing.html?plan=family" class="btn btn-primary">Continue with selected plan &rarr;</a>
+        </div>
+      </div>
+    </div>
+
     <div class="table-card">
       <div class="table-head">
         <h2>Removal progress</h2>
@@ -138,6 +165,27 @@
   document.getElementById('activityBody').innerHTML = activity.map(a =>
     `<tr><td class="muted">${a.when}</td><td>${a.what}</td></tr>`
   ).join('');
+
+  // Plan picker — show for trialing users so they can choose AFTER seeing results.
+  if (!u.subscription_status || u.subscription_status === 'trialing') {
+    const card = document.getElementById('plan-picker-card');
+    if (card) {
+      card.style.display = '';
+      let plan = 'family';
+      const picker = document.getElementById('dash-tier-picker');
+      const cont = document.getElementById('plan-continue');
+      function highlight() {
+        picker.querySelectorAll('.tier-option').forEach(o => {
+          o.classList.toggle('selected', o.dataset.plan === plan);
+        });
+        cont.href = 'billing.html?plan=' + plan;
+      }
+      picker.querySelectorAll('.tier-option').forEach(o => {
+        o.addEventListener('click', () => { plan = o.dataset.plan; highlight(); });
+      });
+      highlight();
+    }
+  }
 
   // Latest exposures (top 6 by status: found first)
   const sortKey = {found: 0, req: 1, gone: 2};
