@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block subject %}Your monthly privacy report{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 16px 0;font-size:22px;font-weight:700;color:#1a1d2e;">Your month at a glance</h1>
+<p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#374151;">
+  Here's what happened with your data privacy this month:
+</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px 0;">
+  <tr>
+    <td style="padding:12px;background:#fafbff;border-radius:10px;text-align:center;">
+      <div style="font-size:28px;font-weight:700;color:#4f46e5;line-height:1.1;">{{ removed_count }}</div>
+      <div style="font-size:13px;color:#6b7280;margin-top:4px;text-transform:uppercase;letter-spacing:0.04em;">Removed</div>
+    </td>
+    <td width="12"></td>
+    <td style="padding:12px;background:#fafbff;border-radius:10px;text-align:center;">
+      <div style="font-size:28px;font-weight:700;color:#1a1d2e;line-height:1.1;">{{ in_progress_count }}</div>
+      <div style="font-size:13px;color:#6b7280;margin-top:4px;text-transform:uppercase;letter-spacing:0.04em;">In progress</div>
+    </td>
+    <td width="12"></td>
+    <td style="padding:12px;background:#fafbff;border-radius:10px;text-align:center;">
+      <div style="font-size:28px;font-weight:700;color:#ff6b6b;line-height:1.1;">{{ new_count }}</div>
+      <div style="font-size:13px;color:#6b7280;margin-top:4px;text-transform:uppercase;letter-spacing:0.04em;">New exposures</div>
+    </td>
+  </tr>
+</table>
+<p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#374151;">
+  We scanned {{ brokers_scanned }} data brokers on your behalf this month.
+  {% if new_count %}We found you on {{ new_count }} new site(s) and have already queued removals for each.{% endif %}
+</p>
+<p style="margin:0 0 32px 0;">
+  <a href="{{ dashboard_url }}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 24px;border-radius:10px;">View full report</a>
+</p>
+{% endblock %}

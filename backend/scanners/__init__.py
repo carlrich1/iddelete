@@ -1,14 +1,6 @@
 """Scanner registry and dispatcher.
 
 Each scanner is a subclass of ``BaseScanner`` registered via ``register()``.
-Calling ``schedule_full_scan(user_id)`` kicks off a background scan that
-runs each registered scanner against the user's identifiers.
-
-By default only the deterministic ``MockScanner`` is enabled. Real broker
-scanners are only loaded when the env var ``EY_REAL_SCANNERS=1`` is set.
-Even then, the production-quality wrappers in ``real_*`` modules need
-residential proxies and CAPTCHA-solving credentials configured to actually
-make HTTP calls — they are illustrative scaffolding, not turnkey scrapers.
 """
 
 from __future__ import annotations
@@ -29,7 +21,6 @@ _REGISTRY: list[Type[BaseScanner]] = []
 
 
 def register(cls: Type[BaseScanner]) -> Type[BaseScanner]:
-    """Decorator to register a scanner class."""
     if cls.slug in (c.slug for c in _REGISTRY):
         log.warning("Scanner with slug %r already registered; replacing", cls.slug)
         _REGISTRY[:] = [c for c in _REGISTRY if c.slug != cls.slug]
@@ -41,18 +32,9 @@ def registered() -> list[Type[BaseScanner]]:
     return list(_REGISTRY)
 
 
-# ---------------------------------------------------------------------------
-# Load scanners
-# ---------------------------------------------------------------------------
-
-# Always-on mock scanner used in dev/tests
+# Always-on mock scanner
 from . import mock  # noqa: E402,F401
 
-# Always-on "real-pattern" scanners. These show the structure of a real
-# broker integration but operate against the broker's *public search and
-# opt-out* surfaces only, with conservative rate limits and no anti-bot
-# evasion. If a broker blocks them they will fail gracefully and the
-# exposure stays in ``found`` state so a human can review.
 if os.environ.get("EY_REAL_SCANNERS") == "1":
     try:
         from . import whitepages  # noqa: F401
@@ -62,20 +44,13 @@ if os.environ.get("EY_REAL_SCANNERS") == "1":
         log.exception("Failed to load real scanners: %s", e)
 
 
-# ---------------------------------------------------------------------------
-# Scanning
-# ---------------------------------------------------------------------------
-
 def _identifiers_for(user_row) -> dict:
-    """Normalize a user row into a scanner identifier dict."""
     name = (user_row["name"] or "").strip()
     parts = name.split(" ", 1)
-    first = parts[0] if parts else ""
-    last = parts[1] if len(parts) > 1 else ""
     return {
         "name": name,
-        "first_name": first,
-        "last_name": last,
+        "first_name": parts[0] if parts else "",
+        "last_name": parts[1] if len(parts) > 1 else "",
         "email": user_row["email"],
         "phone": user_row["phone"] or "",
         "city": user_row["city"] or "",
@@ -119,49 +94,46 @@ def run_full_scan(user_id: int) -> None:
                 exposed_json = json.dumps(m.get("exposed_fields", []))
                 try:
                     conn.execute(
-                        """
-                        INSERT INTO exposures(
-                            user_id, broker_slug, broker_name, profile_url,
-                            exposed_fields, match_confidence, status,
-                            last_checked_at, created_at
-                        ) VALUES (?,?,?,?,?,?,?,?,?)
-                        """,
-                        (
-                            user_id,
-                            scanner.slug,
-                            scanner.name,
-                            m.get("profile_url"),
-                            exposed_json,
-                            m.get("match_confidence", 0.9),
-                            "found",
-                            now(),
-                            now(),
-                        ),
+                        "INSERT INTO exposures(user_id, broker_slug, broker_name, profile_url, "
+                        "exposed_fields, match_confidence, status, last_checked_at, created_at) "
+                        "VALUES (?,?,?,?,?,?,?,?,?)",
+                        (user_id, scanner.slug, scanner.name, m.get("profile_url"),
+                         exposed_json, m.get("match_confidence", 0.9), "found", now(), now()),
                     )
                     new_count += 1
                 except Exception:
-                    # Most likely a uniqueness collision — update last_checked
                     conn.execute(
-                        """
-                        UPDATE exposures SET last_checked_at = ?
-                        WHERE user_id = ? AND broker_slug = ?
-                              AND COALESCE(profile_url,'') = COALESCE(?,'')
-                        """,
+                        "UPDATE exposures SET last_checked_at = ? "
+                        "WHERE user_id = ? AND broker_slug = ? "
+                        "AND COALESCE(profile_url,'') = COALESCE(?,'')",
                         (now(), user_id, scanner.slug, m.get("profile_url")),
                     )
-            # Be polite to the broker between calls
             time.sleep(scanner.rate_limit_seconds)
 
         conn.execute(
-            "UPDATE scan_runs SET finished_at = ?, brokers_scanned = ?, new_exposures = ?, status = ? WHERE id = ?",
+            "UPDATE scan_runs SET finished_at = ?, brokers_scanned = ?, "
+            "new_exposures = ?, status = ? WHERE id = ?",
             (now(), len(scanners), new_count, "complete", scan_run_id),
         )
         conn.commit()
         log.info("Scan for user %d complete: %d new exposures", user_id, new_count)
 
+        try:
+            from ..mailer import notify, site_url
+            notify(
+                user_id=user_id, user_email=user["email"], kind="scan_complete",
+                short_body=f"Scan complete - found you on {new_count} site(s).",
+                template="scan_complete",
+                context={"brokers_scanned": len(scanners), "found_count": new_count,
+                         "dashboard_url": f"{site_url()}/dashboard.html"},
+                conn=conn,
+            )
+            conn.commit()
+        except Exception:
+            log.exception("scan_complete notify failed")
+
 
 def schedule_full_scan(user_id: int) -> None:
-    """Run a full scan in a background thread."""
     t = threading.Thread(target=run_full_scan, args=(user_id,), daemon=True)
     t.start()
 

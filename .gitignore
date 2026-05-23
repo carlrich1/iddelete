@@ -41,4 +41,5 @@ desktop.ini
 # Build artefacts
 dist/
 build/
-.fuse_hidden*
+.fuse_hidden* 
+_mount_test.txt 

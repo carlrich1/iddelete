@@ -1,0 +1,15 @@
+Welcome to ID Delete{% if name %}, {{ name }}{% endif %}!
+
+Thanks for signing up. We're already scanning the internet's biggest
+data brokers for your information -- you'll see results on your
+dashboard within a couple of minutes.
+
+Once we find you, we automatically submit removal requests on your
+behalf and keep watching every month so you stay deleted.
+
+Open your dashboard: {{ dashboard_url }}
+
+Questions? Just reply to this email -- a real human reads every message.
+
+-- ID Delete
+   https://iddelete.com

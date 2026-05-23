@@ -1,0 +1,17 @@
+{{ broker_name }} has confirmed your information has been removed.
+
+{% if exposed_fields -%}
+Information that was exposed: {{ exposed_fields }}.
+{% endif %}
+
+{% if remaining -%}
+{{ remaining }} more removal(s) still in progress.
+{%- endif %}
+
+View your removals: {{ dashboard_url }}
+
+We'll keep monitoring -- if {{ broker_name }} ever re-lists you,
+we'll submit the removal again automatically.
+
+-- ID Delete
+   https://iddelete.com

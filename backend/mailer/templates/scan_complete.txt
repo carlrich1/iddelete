@@ -1,0 +1,17 @@
+Scan complete
+
+We checked {{ brokers_scanned }} data brokers and found you on
+{{ found_count }} of them.
+
+{% if found_count -%}
+We've already queued removal requests for each one. You don't need to
+do anything -- we'll email you again as each removal is confirmed.
+{%- else -%}
+Clean slate! We'll keep watching every month and let you know if
+anything changes.
+{%- endif %}
+
+View results: {{ dashboard_url }}
+
+-- ID Delete
+   https://iddelete.com

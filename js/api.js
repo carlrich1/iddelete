@@ -49,7 +49,7 @@
     },
 
     async signup(payload) {
-      // payload: {name, email, password, plan, city, state}
+      // payload: {name, email, password, plan, city, state, captcha_token?}
       if (mode === 'api') {
         const d = await api('/api/auth/signup', {
           method: 'POST',
@@ -95,6 +95,29 @@
         try { await api('/api/auth/logout', { method: 'POST' }); } catch (_) {}
       }
       window.eyAuth.clear();
+    },
+
+    async forgotPassword(email) {
+      if (mode === 'api') {
+        return api('/api/auth/forgot', {
+          method: 'POST',
+          body: JSON.stringify({ email }),
+        });
+      }
+      // local fallback: no-op (no email infrastructure)
+      return { ok: true };
+    },
+
+    async resetPassword(token, password) {
+      if (mode === 'api') {
+        const d = await api('/api/auth/reset', {
+          method: 'POST',
+          body: JSON.stringify({ token, password }),
+        });
+        if (d.user) window.eyAuth.setUser(d.user);
+        return d;
+      }
+      throw new Error('api_required');
     },
 
     // ---------- scan ----------

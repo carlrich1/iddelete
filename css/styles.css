@@ -437,3 +437,65 @@ td.muted { color: var(--slate); }
 .muted { color: var(--slate); }
 .hide-mobile { display: initial; }
 @media (max-width: 880px) { .hide-mobile { display: none; } }
+
+/* =====================================================================
+   Mobile polish — touch targets, iOS Safari quirks, safe-area, PWA fit
+   ===================================================================== */
+
+/* iOS Safari sometimes computes 100vh including the address bar.
+   100dvh is the modern dynamic viewport unit — falls back gracefully. */
+@supports (height: 100dvh) {
+  .app-shell { min-height: 100dvh; }
+}
+
+/* Honor the iPhone notch / home indicator on the header and footer.
+   Requires viewport-fit=cover in the <meta viewport> tag (added per page). */
+.site-header {
+  padding-left: max(0px, env(safe-area-inset-left));
+  padding-right: max(0px, env(safe-area-inset-right));
+}
+.site-footer {
+  padding-left: max(0px, env(safe-area-inset-left));
+  padding-right: max(0px, env(safe-area-inset-right));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+/* Inputs at 16px+ prevent iOS Safari from auto-zooming on focus.
+   We already use 1rem (16px); enforce it explicitly on phone widths. */
+@media (max-width: 540px) {
+  input, select, textarea, button {
+    font-size: 16px;
+  }
+}
+
+/* Touch-target floor: 44x44 CSS pixels (Apple HIG) on touch devices. */
+@media (pointer: coarse) {
+  .btn, button {
+    min-height: 44px;
+  }
+  .nav a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+  }
+  .form-foot a, .checkbox label a {
+    padding: 4px 0;
+    display: inline-block;
+  }
+}
+
+/* Smooth tap feedback in brand color, not the default ugly blue flash */
+* {
+  -webkit-tap-highlight-color: rgba(79, 70, 229, 0.10);
+}
+
+/* Smoother momentum scrolling for any internally-scrollable region */
+.table, .data-grid {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Skip the 300ms tap delay on iOS while preserving pinch-zoom */
+html {
+  touch-action: manipulation;
+}

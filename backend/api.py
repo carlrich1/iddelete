@@ -1,12 +1,9 @@
-"""Public REST API for the dashboard.
-
-All routes here require an authenticated session (see ``auth.py``). Output
-shape mirrors what the existing static frontend expects from ``app.js``.
-"""
+"""Public REST API for the dashboard."""
 
 from __future__ import annotations
 
 import json
+import os
 import time
 from typing import Any
 
@@ -18,51 +15,42 @@ from .scanners import list_scanners, schedule_full_scan
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
 _FRONTEND_STATUS = {
-    # backend status -> frontend pill (matches static-only build)
     "found":  "found",
     "req":    "req",
     "gone":   "gone",
-    "manual": "req",   # show as in-progress; specialist will pick up
+    "manual": "req",
 }
 
 
 def _exposure_to_dict(row) -> dict:
     return {
-        "id":          row["id"],
-        "broker":      row["broker_name"],
+        "id": row["id"],
+        "broker": row["broker_name"],
         "broker_slug": row["broker_slug"],
-        "profileUrl":  row["profile_url"],
-        "exposed":     json.loads(row["exposed_fields"] or "[]"),
-        "confidence":  row["match_confidence"],
-        "status":      _FRONTEND_STATUS.get(row["status"], row["status"]),
+        "profileUrl": row["profile_url"],
+        "exposed": json.loads(row["exposed_fields"] or "[]"),
+        "confidence": row["match_confidence"],
+        "status": _FRONTEND_STATUS.get(row["status"], row["status"]),
         "requestedAt": _ts(row["requested_at"]),
-        "removedAt":   _ts(row["removed_at"]),
+        "removedAt": _ts(row["removed_at"]),
     }
 
 
-def _ts(v) -> str | None:
+def _ts(v):
     if not v:
         return None
     return time.strftime("%Y-%m-%d", time.gmtime(float(v)))
 
 
-# ---------------------------------------------------------------------------
-# Profile
-# ---------------------------------------------------------------------------
+# ----- Profile -------------------------------------------------------------
 
 @bp.patch("/profile")
 @login_required
 def update_profile():
     data = request.get_json(silent=True) or {}
     fields = ["name", "phone", "dob", "city", "state", "prev_addresses", "aliases"]
-    updates = []
-    args: list[Any] = []
+    updates, args = [], []
     for f in fields:
         if f in data:
             updates.append(f"{f} = ?")
@@ -85,9 +73,7 @@ def delete_account():
     return jsonify(ok=True)
 
 
-# ---------------------------------------------------------------------------
-# Scan / exposures
-# ---------------------------------------------------------------------------
+# ----- Scan / exposures ----------------------------------------------------
 
 @bp.get("/scan")
 @login_required
@@ -97,13 +83,10 @@ def list_exposures():
         "SELECT * FROM exposures WHERE user_id = ? ORDER BY status, broker_name",
         (g.user["id"],),
     ).fetchall()
-    return jsonify(
-        exposures=[_exposure_to_dict(r) for r in rows],
-        summary=_summary(rows),
-    )
+    return jsonify(exposures=[_exposure_to_dict(r) for r in rows], summary=_summary(rows))
 
 
-def _summary(rows) -> dict:
+def _summary(rows):
     out = {"total": len(rows), "found": 0, "req": 0, "gone": 0}
     for r in rows:
         s = _FRONTEND_STATUS.get(r["status"], r["status"])
@@ -119,9 +102,7 @@ def run_scan():
     return jsonify(ok=True, message="Scan kicked off; refresh in ~30s.")
 
 
-# ---------------------------------------------------------------------------
-# Removals
-# ---------------------------------------------------------------------------
+# ----- Removals ------------------------------------------------------------
 
 @bp.get("/removals")
 @login_required
@@ -150,18 +131,14 @@ def list_removals():
     return jsonify(removals=out)
 
 
-# ---------------------------------------------------------------------------
-# Brokers catalogue
-# ---------------------------------------------------------------------------
+# ----- Brokers catalogue ---------------------------------------------------
 
 @bp.get("/brokers")
 def brokers():
     return jsonify(brokers=list_scanners())
 
 
-# ---------------------------------------------------------------------------
-# Health
-# ---------------------------------------------------------------------------
+# ----- Health --------------------------------------------------------------
 
 @bp.get("/health")
 def health():
@@ -170,3 +147,14 @@ def health():
     n_exposures = db.execute("SELECT COUNT(*) FROM exposures").fetchone()[0]
     return jsonify(ok=True, users=n_users, exposures=n_exposures,
                    scanners=len(list_scanners()))
+
+
+# ----- Public client config ------------------------------------------------
+
+@bp.get("/config")
+def config():
+    """Public-safe config the frontend needs (e.g. CAPTCHA sitekey).
+    Never include secrets here — this endpoint is unauthenticated."""
+    return jsonify(
+        hcaptcha_sitekey=os.environ.get("HCAPTCHA_SITEKEY") or None,
+    )

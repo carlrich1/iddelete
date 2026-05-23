@@ -1,0 +1,16 @@
+Your monthly ID Delete report
+
+Removed this month:       {{ removed_count }}
+Removals still in progress: {{ in_progress_count }}
+New exposures found:       {{ new_count }}
+
+We scanned {{ brokers_scanned }} data brokers on your behalf this month.
+{% if new_count -%}
+We found you on {{ new_count }} new site(s) and have already queued
+removals for each.
+{%- endif %}
+
+View full report: {{ dashboard_url }}
+
+-- ID Delete
+   https://iddelete.com
