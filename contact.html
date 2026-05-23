@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact — ID Delete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container inner">
+    <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav class="nav">
+      <a href="how-it-works.html">How it works</a><a href="pricing.html">Pricing</a><a href="data-brokers.html">Data brokers</a><a href="faq.html">FAQ</a><a href="about.html">About</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="login.html" data-when="loggedout">Log in</a>
+      <a class="btn btn-primary" href="signup.html" data-when="loggedout">Start free scan</a>
+      <a class="btn btn-primary" href="dashboard.html" data-when="loggedin" style="display:none">Open dashboard</a>
+      <button class="menu-toggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" style="padding: 56px 0 24px;">
+  <div class="container container-narrow center">
+    <span class="eyebrow" style="display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);background:#eef2ff;padding:6px 12px;border-radius:999px;">Contact</span>
+    <h1 class="mt-2">Reach a real human.</h1>
+    <p class="sub">Most questions are answered fastest by email. Pro customers can also call.</p>
+  </div>
+</section>
+
+<section style="padding-top: 24px;">
+  <div class="container">
+    <div class="grid grid-3">
+      <div class="card">
+        <h3>General</h3>
+        <p>Questions about plans, signup, or how the service works.</p>
+        <p><strong><a href="mailto:hello@iddelete.com">hello@iddelete.com</a></strong></p>
+      </div>
+      <div class="card">
+        <h3>Support</h3>
+        <p>Already a customer and need help with a removal or your account.</p>
+        <p><strong><a href="mailto:support@iddelete.com">support@iddelete.com</a></strong></p>
+      </div>
+      <div class="card">
+        <h3>Press &amp; partnerships</h3>
+        <p>Media inquiries, podcast invites, partnership proposals.</p>
+        <p><strong><a href="mailto:press@iddelete.com">press@iddelete.com</a></strong></p>
+      </div>
+    </div>
+
+    <div class="form-card mt-6" style="max-width:640px">
+      <h1>Send us a note</h1>
+      <p class="sub">We answer within one business day.</p>
+      <form id="contact-form">
+        <div class="form-row">
+          <div class="field"><label for="cname">Name</label><input id="cname" type="text" required></div>
+          <div class="field"><label for="cemail">Email</label><input id="cemail" type="email" required></div>
+        </div>
+        <div class="field"><label for="ctopic">Topic</label>
+          <select id="ctopic">
+            <option>General question</option>
+            <option>Billing</option>
+            <option>Removal status</option>
+            <option>Press / media</option>
+            <option>Business / employee plans</option>
+          </select>
+        </div>
+        <div class="field"><label for="cmsg">Message</label><textarea id="cmsg" rows="5" required></textarea></div>
+        <button class="btn btn-primary btn-block" type="submit">Send message</button>
+        <p id="cresult" class="form-foot" style="display:none;color:var(--good);">Thanks — we'll be in touch within one business day.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a><p class="tagline">We erase y'all from the internet's data brokers — automatically, continuously, for less than a streaming service.</p></div>
+      <div><h4>Product</h4><a href="how-it-works.html">How it works</a><a href="pricing.html">Pricing</a><a href="data-brokers.html">Data brokers covered</a><a href="faq.html">FAQ</a></div>
+      <div><h4>Company</h4><a href="about.html">About</a><a href="contact.html">Contact</a><a href="#">Press</a><a href="#">Careers</a></div>
+      <div><h4>Legal</h4><a href="privacy.html">Privacy policy</a><a href="terms.html">Terms of service</a><a href="#">Do not sell my info</a><a href="#">Security</a></div>
+    </div>
+    <div class="copyright"><span>© 2026 ID Delete, Inc. All rights reserved.</span><span>Made with care, in the southern style.</span></div>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+<script>
+  document.getElementById('contact-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    document.getElementById('cresult').style.display = 'block';
+    e.target.reset();
+  });
+</script>
+</body>
+</html>

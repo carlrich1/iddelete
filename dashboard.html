@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — ID Delete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="logo" href="dashboard.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav>
+      <a href="dashboard.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Overview</a>
+      <a href="scan.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Exposure scan</a>
+      <a href="removals.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Removals</a>
+      <a href="settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+      <a href="billing.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Billing</a>
+    </nav>
+    <div class="user">
+      <strong id="userName">—</strong>
+      <span id="userEmail">—</span>
+      <div style="margin-top:14px"><a href="#" data-action="logout" style="color:#94a3b8">Log out →</a></div>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar">
+      <div>
+        <h1 class="mt-0">Welcome back, <span id="firstName">there</span>.</h1>
+        <p>Here's what's happening with your removals.</p>
+      </div>
+      <a href="scan.html" class="btn btn-primary">View exposure report</a>
+    </div>
+
+    <div id="welcome-banner" class="alert success" style="display:none">
+      <strong>Your scan is ready!</strong>&nbsp; We found exposures on <span id="welcome-count"></span> data brokers. Removal requests are already going out.
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="label">Brokers scanned</div><div class="val" id="statScanned">200+</div><div class="delta">Last scan: today</div></div>
+      <div class="stat"><div class="label">Records found</div><div class="val" id="statFound">—</div><div class="delta">on data broker sites</div></div>
+      <div class="stat"><div class="label">Removals in flight</div><div class="val" id="statReq">—</div><div class="delta">awaiting confirmation</div></div>
+      <div class="stat"><div class="label">Removed so far</div><div class="val" id="statGone">—</div><div class="delta good">we keep watching</div></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-head">
+        <h2>Removal progress</h2>
+        <a href="removals.html" class="btn btn-ghost">See all →</a>
+      </div>
+      <div style="padding: 22px;">
+        <div style="display:flex;justify-content:space-between;font-size:.9rem;color:var(--slate);margin-bottom:6px">
+          <span><strong id="progressDone" style="color:var(--ink)">0</strong> of <strong id="progressTotal" style="color:var(--ink)">0</strong> brokers cleared</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress"><div id="progressBar" style="width:0%"></div></div>
+        <p class="muted mt-3 mb-0">We're working through your exposures. Most removals complete within 14–45 days; we'll keep at it.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-2 mt-4">
+      <div class="table-card">
+        <div class="table-head"><h2>Recent activity</h2></div>
+        <table>
+          <thead><tr><th>When</th><th>What happened</th></tr></thead>
+          <tbody id="activityBody"></tbody>
+        </table>
+      </div>
+      <div class="table-card">
+        <div class="table-head"><h2>Latest exposures</h2><a href="scan.html" class="btn btn-ghost">View report →</a></div>
+        <table>
+          <thead><tr><th>Broker</th><th>Status</th></tr></thead>
+          <tbody id="latestBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cta-banner mt-6">
+      <h2>Want us watching even faster?</h2>
+      <p>Upgrade to Pro for weekly re-scans, 500+ brokers, and a dedicated specialist.</p>
+      <a class="btn btn-ghost btn-lg" href="billing.html">See Pro details →</a>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+<script>
+(async () => {
+  await window.eyBackend.ready;
+  const u = await window.eyBackend.me();
+  if (!u) { location.href = 'login.html'; return; }
+  document.getElementById('userName').textContent = u.name || u.email;
+  document.getElementById('userEmail').textContent = u.email;
+  document.getElementById('firstName').textContent = (u.name || u.email).split(' ')[0];
+
+  const scan = await window.eyBackend.getScan();
+  const found = scan.filter(s => s.status === 'found').length;
+  const req   = scan.filter(s => s.status === 'req').length;
+  const gone  = scan.filter(s => s.status === 'gone').length;
+  const total = scan.length;
+
+  document.getElementById('statFound').textContent = found + req + gone;
+  document.getElementById('statReq').textContent = req;
+  document.getElementById('statGone').textContent = gone;
+
+  document.getElementById('progressDone').textContent = gone;
+  document.getElementById('progressTotal').textContent = total;
+  const pct = total > 0 ? Math.round((gone / total) * 100) : 0;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressBar').style.width = pct + '%';
+
+  // Welcome banner
+  if (new URLSearchParams(location.search).get('welcome')) {
+    const wb = document.getElementById('welcome-banner');
+    wb.style.display = 'flex';
+    document.getElementById('welcome-count').textContent = total;
+  }
+
+  // Activity feed
+  const activity = [
+    {when: 'Today', what: `Initial exposure scan complete — ${total} records found across ${total} brokers`},
+    {when: 'Today', what: `${found + req} removal requests queued`},
+    {when: 'Today', what: `${req} removal requests already submitted`},
+    {when: 'Yesterday', what: `${gone > 0 ? gone + ' early removals confirmed' : 'Welcome email sent'}`},
+  ];
+  document.getElementById('activityBody').innerHTML = activity.map(a =>
+    `<tr><td class="muted">${a.when}</td><td>${a.what}</td></tr>`
+  ).join('');
+
+  // Latest exposures (top 6 by status: found first)
+  const sortKey = {found: 0, req: 1, gone: 2};
+  const latest = [...scan].sort((a,b) => sortKey[a.status] - sortKey[b.status]).slice(0, 6);
+  const pillLabel = {found: 'Exposed', req: 'Removal sent', gone: 'Removed ✓'};
+  document.getElementById('latestBody').innerHTML = latest.map(s =>
+    `<tr><td><strong>${s.broker}</strong></td><td><span class="pill ${s.status}">${pillLabel[s.status]}</span></td></tr>`
+  ).join('');
+})();
+</script>
+</body>
+</html>

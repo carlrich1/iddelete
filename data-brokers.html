@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data brokers covered — ID Delete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container inner">
+    <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav class="nav">
+      <a href="how-it-works.html">How it works</a><a href="pricing.html">Pricing</a><a href="data-brokers.html">Data brokers</a><a href="faq.html">FAQ</a><a href="about.html">About</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="login.html" data-when="loggedout">Log in</a>
+      <a class="btn btn-primary" href="signup.html" data-when="loggedout">Start free scan</a>
+      <a class="btn btn-primary" href="dashboard.html" data-when="loggedin" style="display:none">Open dashboard</a>
+      <button class="menu-toggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" style="padding: 56px 0 24px;">
+  <div class="container container-narrow center">
+    <span class="eyebrow" style="display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);background:#eef2ff;padding:6px 12px;border-radius:999px;">Coverage</span>
+    <h1 class="mt-2">200+ data brokers. And growing.</h1>
+    <p class="sub" style="font-size:1.15rem;max-width:640px;margin:18px auto 0;">These are the sites we scan, monitor, and force to delete you. Pro plan adds another 300+ specialty databases.</p>
+  </div>
+</section>
+
+<section style="padding-top: 24px;">
+  <div class="container">
+    <div class="card" style="margin-bottom:24px">
+      <h3>What counts as a "data broker"?</h3>
+      <p>Any site that collects, packages, and resells your personal information without you having signed up for it. The big ones are people-search engines (Spokeo, WhitePages), background-check aggregators (BeenVerified, Intelius), marketing databases (Acxiom, Epsilon, LexisNexis), and a long tail of niche scrapers most people have never heard of. They feed each other, so removing yourself from one isn't enough.</p>
+    </div>
+
+    <div class="grid grid-4" id="broker-grid"></div>
+
+    <p class="center muted mt-4">This is a sample. Sign up to see the complete, updated list with current removal status for each one.</p>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>See which of these have your info.</h2>
+      <p>Free exposure scan covers all the brokers listed above.</p>
+      <a class="btn btn-ghost btn-lg" href="signup.html">Run my free scan →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a><p class="tagline">We erase y'all from the internet's data brokers — automatically, continuously, for less than a streaming service.</p></div>
+      <div><h4>Product</h4><a href="how-it-works.html">How it works</a><a href="pricing.html">Pricing</a><a href="data-brokers.html">Data brokers covered</a><a href="faq.html">FAQ</a></div>
+      <div><h4>Company</h4><a href="about.html">About</a><a href="contact.html">Contact</a><a href="#">Press</a><a href="#">Careers</a></div>
+      <div><h4>Legal</h4><a href="privacy.html">Privacy policy</a><a href="terms.html">Terms of service</a><a href="#">Do not sell my info</a><a href="#">Security</a></div>
+    </div>
+    <div class="copyright"><span>© 2026 ID Delete, Inc. All rights reserved.</span><span>Made with care, in the southern style.</span></div>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+<script>
+  const grid = document.getElementById('broker-grid');
+  grid.innerHTML = window.eyBrokers.map(b => `
+    <div style="background:white;border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:10px;">
+      <span style="width:8px;height:8px;border-radius:999px;background:var(--good);flex-shrink:0;"></span>
+      <span style="font-weight:600;color:var(--ink);font-size:.95rem;">${b}</span>
+    </div>
+  `).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in — ID Delete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container inner">
+    <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav class="nav">
+      <a href="how-it-works.html">How it works</a><a href="pricing.html">Pricing</a><a href="data-brokers.html">Data brokers</a><a href="faq.html">FAQ</a><a href="about.html">About</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-primary" href="signup.html">Start free scan</a>
+    </div>
+  </div>
+</header>
+
+<section style="padding: 56px 0;">
+  <div class="form-card">
+    <h1>Welcome back.</h1>
+    <p class="sub">Log in to see your removal status.</p>
+
+    <form id="login-form">
+      <div class="field"><label for="email">Email</label><input id="email" type="email" required></div>
+      <div class="field"><label for="password">Password</label><input id="password" type="password" required></div>
+
+      <button class="btn btn-primary btn-block btn-lg" type="submit">Log in</button>
+
+      <p class="form-foot"><a href="#">Forgot your password?</a></p>
+      <p class="form-foot">No account yet? <a href="signup.html">Start your free scan</a></p>
+    </form>
+  </div>
+</section>
+
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+<script>
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await window.eyBackend.ready;
+    const submitBtn = e.target.querySelector('button[type=submit]');
+    submitBtn.disabled = true; submitBtn.textContent = 'Logging in…';
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    try {
+      await window.eyBackend.login(email, password);
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      submitBtn.disabled = false; submitBtn.textContent = 'Log in';
+      alert('Invalid email or password.');
+    }
+  });
+</script>
+</body>
+</html>

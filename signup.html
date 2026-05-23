@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start your free scan — ID Delete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container inner">
+    <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav class="nav">
+      <a href="how-it-works.html">How it works</a><a href="pricing.html">Pricing</a><a href="data-brokers.html">Data brokers</a><a href="faq.html">FAQ</a><a href="about.html">About</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="login.html">Log in</a>
+    </div>
+  </div>
+</header>
+
+<section style="padding: 24px 0 80px;">
+  <div class="form-card" style="max-width:560px">
+    <h1>Start your free scan</h1>
+    <p class="sub">90 seconds, no credit card. We'll show you which brokers have your info before you decide whether to subscribe.</p>
+
+    <form id="signup-form">
+      <div class="form-row">
+        <div class="field"><label for="firstName">First name</label><input id="firstName" type="text" required></div>
+        <div class="field"><label for="lastName">Last name</label><input id="lastName" type="text" required></div>
+      </div>
+      <div class="field"><label for="email">Email address</label><input id="email" type="email" required></div>
+      <div class="field"><label for="password">Password</label><input id="password" type="password" required minlength="8"></div>
+
+      <div class="form-row">
+        <div class="field"><label for="city">City</label><input id="city" type="text" placeholder="Optional"></div>
+        <div class="field"><label for="state">State</label>
+          <select id="state">
+            <option value="">Select…</option>
+            <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+            <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+            <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+            <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+            <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+            <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+            <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+            <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+            <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
+            <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+          </select>
+        </div>
+      </div>
+
+      <label style="margin-top:8px;">Pick a plan (you only pay if you decide to continue)</label>
+      <div class="tier-picker" id="tier-picker">
+        <div class="tier-option" data-plan="personal">
+          <div><div class="t-name">Personal</div><div class="t-desc">1 person · 200+ brokers</div></div>
+          <div class="t-price">$9/mo</div>
+        </div>
+        <div class="tier-option selected" data-plan="family">
+          <div><div class="t-name">Family <span style="background:var(--brand);color:white;font-size:.7rem;padding:2px 8px;border-radius:999px;margin-left:6px">Popular</span></div><div class="t-desc">Up to 4 people · 200+ brokers</div></div>
+          <div class="t-price">$19/mo</div>
+        </div>
+        <div class="tier-option" data-plan="pro">
+          <div><div class="t-name">Pro</div><div class="t-desc">Up to 4 · 500+ brokers · Weekly scans</div></div>
+          <div class="t-price">$29/mo</div>
+        </div>
+      </div>
+
+      <div class="checkbox mb-2">
+        <input id="agree" type="checkbox" required>
+        <label for="agree" style="font-weight:400">I agree to the <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy Policy</a>, and I authorize ID Delete to submit removal requests on my behalf.</label>
+      </div>
+
+      <button class="btn btn-primary btn-block btn-lg" type="submit">Run my free scan →</button>
+
+      <p class="form-foot">Already have an account? <a href="login.html">Log in</a></p>
+    </form>
+  </div>
+</section>
+
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+<script>
+  // Tier picker
+  const picker = document.getElementById('tier-picker');
+  let plan = (new URLSearchParams(location.search).get('plan')) || 'family';
+  function highlight() {
+    picker.querySelectorAll('.tier-option').forEach(o => {
+      o.classList.toggle('selected', o.dataset.plan === plan);
+    });
+  }
+  picker.querySelectorAll('.tier-option').forEach(o => {
+    o.addEventListener('click', () => { plan = o.dataset.plan; highlight(); });
+  });
+  highlight();
+
+  // Submit
+  document.getElementById('signup-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await window.eyBackend.ready;
+    const submitBtn = e.target.querySelector('button[type=submit]');
+    submitBtn.disabled = true; submitBtn.textContent = 'Running scan…';
+    try {
+      await window.eyBackend.signup({
+        name: document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        plan,
+      });
+      window.location.href = 'dashboard.html?welcome=1';
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Run my free scan →';
+      const msg = err.message === 'email_in_use' ? 'That email is already registered.' :
+                  err.message === 'password_too_short' ? 'Password must be at least 8 characters.' :
+                  err.message === 'invalid_email' ? 'Please enter a valid email.' :
+                  'Signup failed. Please try again.';
+      alert(msg);
+    }
+  });
+</script>
+</body>
+</html>

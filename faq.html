@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ — ID Delete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container inner">
+    <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav class="nav">
+      <a href="how-it-works.html">How it works</a><a href="pricing.html">Pricing</a><a href="data-brokers.html">Data brokers</a><a href="faq.html">FAQ</a><a href="about.html">About</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="login.html" data-when="loggedout">Log in</a>
+      <a class="btn btn-primary" href="signup.html" data-when="loggedout">Start free scan</a>
+      <a class="btn btn-primary" href="dashboard.html" data-when="loggedin" style="display:none">Open dashboard</a>
+      <button class="menu-toggle" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" style="padding: 56px 0 24px;">
+  <div class="container container-narrow center">
+    <span class="eyebrow" style="display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);background:#eef2ff;padding:6px 12px;border-radius:999px;">FAQ</span>
+    <h1 class="mt-2">Questions, answered straight.</h1>
+  </div>
+</section>
+
+<section style="padding-top: 24px;">
+  <div class="container container-narrow">
+
+    <h3 style="margin-top:24px;color:var(--brand);font-size:.9rem;text-transform:uppercase;letter-spacing:.08em;">The basics</h3>
+
+    <details class="faq-item"><summary>Is this legal?</summary>
+      <p class="answer">Yes. State privacy laws (CCPA, CDPA, CPA, UCPA, CTDPA, etc.) and the brokers' own published policies require them to delete your data when you request it. We just submit those requests on your behalf, in the exact format each broker requires, and follow up if they don't comply.</p>
+    </details>
+
+    <details class="faq-item"><summary>Do you sell my data?</summary>
+      <p class="answer">No, and we'd close the company before we did. We use your identifiers only to find you on broker sites and submit removals. No advertising, no analytics partners with PII, no AI training, no resale, ever. Read the <a href="privacy.html">privacy policy</a>.</p>
+    </details>
+
+    <details class="faq-item"><summary>How is this different from doing it myself?</summary>
+      <p class="answer">Functionally, it isn't — you have the right to file every one of these requests yourself, for free. Practically, it would take you 200+ hours to file them initially and then about 10 hours/month forever to re-do them. We do all of it for $9/month.</p>
+    </details>
+
+    <details class="faq-item"><summary>How is this different from DeleteMe / Incogni / Kanary?</summary>
+      <p class="answer">We cover the same kinds of brokers and use the same legal mechanisms. We're cheaper, our dashboard is friendlier, our family plan includes more people for less money, and our re-scan cadence is faster. Try our free scan — you'll see the difference.</p>
+    </details>
+
+    <h3 style="margin-top:40px;color:var(--brand);font-size:.9rem;text-transform:uppercase;letter-spacing:.08em;">Timing & results</h3>
+
+    <details class="faq-item"><summary>How long until I'm actually removed?</summary>
+      <p class="answer">First removals usually appear within 7–14 days. Most brokers comply within 45 days (the longest deadline allowed by most state laws). After ~60 days, the majority of your initial listings are gone. Then we keep re-scanning monthly because brokers re-list you.</p>
+    </details>
+
+    <details class="faq-item"><summary>Will my spam calls stop immediately?</summary>
+      <p class="answer">Not immediately — call centers buy lists in bulk and you'll be on lists already in circulation. But over 2–3 months as old lists age out and new lists no longer include you, most subscribers see a significant drop. Many report near-zero by month 4–6.</p>
+    </details>
+
+    <details class="faq-item"><summary>What if a broker ignores the request?</summary>
+      <p class="answer">We resend. If they still ignore us past the statutory deadline, our privacy specialists escalate — sometimes a complaint to the state AG, sometimes a direct legal demand letter. Most brokers fold immediately. The few that don't, we document and report.</p>
+    </details>
+
+    <h3 style="margin-top:40px;color:var(--brand);font-size:.9rem;text-transform:uppercase;letter-spacing:.08em;">Privacy & security</h3>
+
+    <details class="faq-item"><summary>Why do you need so much personal info?</summary>
+      <p class="answer">Brokers identify you by combinations of name + DOB + address + phone. To find every listing of you, we need to search every combination. We collect the minimum needed for that, encrypt it at rest, and never share it.</p>
+    </details>
+
+    <details class="faq-item"><summary>What about my kids?</summary>
+      <p class="answer">The Family plan covers children with the guardian's consent. Kids actually have more leverage — most state laws give minors broader deletion rights, and several brokers must remove them on request without verification.</p>
+    </details>
+
+    <details class="faq-item"><summary>Where is my data stored?</summary>
+      <p class="answer">Encrypted at rest in US-based, SOC2 Type II data centers. Identifiers are encrypted with per-customer keys. Production access is logged and audited.</p>
+    </details>
+
+    <h3 style="margin-top:40px;color:var(--brand);font-size:.9rem;text-transform:uppercase;letter-spacing:.08em;">Plans & billing</h3>
+
+    <details class="faq-item"><summary>Can I cancel anytime?</summary>
+      <p class="answer">Yes — one button in your dashboard, no email, no phone call required. We stop billing immediately and delete your records within 30 days.</p>
+    </details>
+
+    <details class="faq-item"><summary>What's the refund policy?</summary>
+      <p class="answer">If we haven't started your initial scan, full refund. After we've started removals, we refund the unused portion of your plan.</p>
+    </details>
+
+    <details class="faq-item"><summary>Do you offer business / employee plans?</summary>
+      <p class="answer">Yes. <a href="contact.html">Contact us</a> for team pricing. Common for high-risk roles like nurses, social workers, judges, journalists, and executives.</p>
+    </details>
+  </div>
+</section>
+
+<section class="tight">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Still have questions?</h2>
+      <p>Email us at <a style="color:white;text-decoration:underline" href="mailto:hello@iddelete.com">hello@iddelete.com</a> or run a free scan and we'll show you exactly what you're dealing with.</p>
+      <a class="btn btn-ghost btn-lg" href="signup.html">Run my free scan →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a><p class="tagline">We erase y'all from the internet's data brokers — automatically, continuously, for less than a streaming service.</p></div>
+      <div><h4>Product</h4><a href="how-it-works.html">How it works</a><a href="pricing.html">Pricing</a><a href="data-brokers.html">Data brokers covered</a><a href="faq.html">FAQ</a></div>
+      <div><h4>Company</h4><a href="about.html">About</a><a href="contact.html">Contact</a><a href="#">Press</a><a href="#">Careers</a></div>
+      <div><h4>Legal</h4><a href="privacy.html">Privacy policy</a><a href="terms.html">Terms of service</a><a href="#">Do not sell my info</a><a href="#">Security</a></div>
+    </div>
+    <div class="copyright"><span>© 2026 ID Delete, Inc. All rights reserved.</span><span>Made with care, in the southern style.</span></div>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings — ID Delete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="logo" href="dashboard.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav>
+      <a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Overview</a>
+      <a href="scan.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/></svg>Exposure scan</a>
+      <a href="removals.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Removals</a>
+      <a href="settings.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+      <a href="billing.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>Billing</a>
+    </nav>
+    <div class="user">
+      <strong id="userName">—</strong>
+      <span id="userEmail">—</span>
+      <div style="margin-top:14px"><a href="#" data-action="logout" style="color:#94a3b8">Log out →</a></div>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar"><div><h1 class="mt-0">Settings</h1><p>Update your identifiers and notification preferences.</p></div></div>
+
+    <div id="saved-banner" class="alert success" style="display:none">Saved. We'll use this on the next re-scan.</div>
+
+    <div class="table-card" style="padding:28px;">
+      <h2 style="font-size:1.15rem;margin-bottom:18px">Your identifiers</h2>
+      <p class="muted mb-2">We use these to find every listing of you across data brokers. Add maiden names, prior addresses, and old phone numbers — they all find more listings.</p>
+
+      <form id="settings-form" style="margin-top:18px">
+        <div class="form-row">
+          <div class="field"><label>Full name</label><input id="name" type="text"></div>
+          <div class="field"><label>Email</label><input id="email" type="email"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Phone (optional)</label><input id="phone" type="tel" placeholder="555-555-5555"></div>
+          <div class="field"><label>Date of birth (optional)</label><input id="dob" type="text" placeholder="MM/DD/YYYY"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>City</label><input id="city" type="text"></div>
+          <div class="field"><label>State</label><input id="state" type="text" maxlength="2"></div>
+        </div>
+        <div class="field"><label>Previous addresses (one per line, optional)</label><textarea id="prevAddrs" rows="3" placeholder="123 Oak St, Atlanta, GA"></textarea></div>
+        <div class="field"><label>Maiden / former names (optional)</label><input id="aliases" type="text"></div>
+
+        <button class="btn btn-primary" type="submit">Save changes</button>
+      </form>
+    </div>
+
+    <div class="table-card mt-4" style="padding:28px;">
+      <h2 style="font-size:1.15rem;margin-bottom:18px">Notifications</h2>
+      <div class="checkbox mb-2"><input id="nWeekly" type="checkbox" checked><label for="nWeekly" style="font-weight:400">Weekly progress summary email</label></div>
+      <div class="checkbox mb-2"><input id="nNew" type="checkbox" checked><label for="nNew" style="font-weight:400">Alert me when a new exposure is found</label></div>
+      <div class="checkbox mb-2"><input id="nStalled" type="checkbox" checked><label for="nStalled" style="font-weight:400">Alert me when a broker stalls past the legal deadline</label></div>
+    </div>
+
+    <div class="table-card mt-4" style="padding:28px;">
+      <h2 style="font-size:1.15rem;margin-bottom:8px;color:var(--bad)">Danger zone</h2>
+      <p class="muted">Cancel your plan and delete your data. We'll stop billing immediately. Your records will be deleted within 30 days.</p>
+      <button class="btn btn-ghost" id="deleteAcct" style="border-color:#fecaca;color:var(--bad)">Cancel & delete my account</button>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+<script>
+(async () => {
+  await window.eyBackend.ready;
+  const u = await window.eyBackend.me();
+  if (!u) { location.href = 'login.html'; return; }
+  document.getElementById('userName').textContent = u.name || u.email;
+  document.getElementById('userEmail').textContent = u.email;
+  document.getElementById('name').value = u.name || '';
+  document.getElementById('email').value = u.email || '';
+  document.getElementById('city').value = u.city || '';
+  document.getElementById('state').value = u.state || '';
+  document.getElementById('phone').value = u.phone || '';
+  document.getElementById('dob').value = u.dob || '';
+  document.getElementById('prevAddrs').value = u.prev_addresses || u.prevAddrs || '';
+  document.getElementById('aliases').value = u.aliases || '';
+
+  document.getElementById('settings-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await window.eyBackend.updateProfile({
+      name: document.getElementById('name').value,
+      phone: document.getElementById('phone').value,
+      dob: document.getElementById('dob').value,
+      city: document.getElementById('city').value,
+      state: document.getElementById('state').value,
+      prev_addresses: document.getElementById('prevAddrs').value,
+      aliases: document.getElementById('aliases').value,
+    });
+    document.getElementById('saved-banner').style.display = 'flex';
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+
+  document.getElementById('deleteAcct').addEventListener('click', async () => {
+    if (!confirm('Cancel and delete your account? This will stop billing immediately and delete your records within 30 days.')) return;
+    await window.eyBackend.deleteAccount();
+    window.location.href = 'index.html';
+  });
+})();
+</script>
+</body>
+</html>

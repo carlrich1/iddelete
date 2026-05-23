@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ID Delete scrubs your name, address, phone, and email off the internet's data brokers — automatically and continuously.">
+<title>ID Delete — Wipe yourself off the data brokers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container inner">
+    <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav class="nav">
+      <a href="how-it-works.html">How it works</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="data-brokers.html">Data brokers</a>
+      <a href="faq.html">FAQ</a>
+      <a href="about.html">About</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="login.html" data-when="loggedout">Log in</a>
+      <a class="btn btn-primary" href="signup.html" data-when="loggedout">Start free scan</a>
+      <a class="btn btn-primary" href="dashboard.html" data-when="loggedin" style="display:none">Open dashboard</a>
+      <button class="menu-toggle" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1>Wipe yourself off the internet. <span class="accent">All y'all.</span></h1>
+      <p class="sub">
+        Hundreds of data brokers are selling your name, home address, phone number, and family relationships
+        right now. We find every one of them and force them to delete you — then keep doing it, every month, on autopilot.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="signup.html">Run my free scan →</a>
+        <a class="btn btn-ghost btn-lg" href="how-it-works.html">See how it works</a>
+      </div>
+      <div class="hero-trust">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> No credit card to scan</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> 200+ data brokers covered</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Cancel anytime</span>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <strong style="color:var(--ink)">Your exposure report</strong>
+        <span class="status req" style="font-size:.75rem;padding:4px 10px;border-radius:999px;">47 records found</span>
+      </div>
+      <div class="scan-row"><span class="name">Spokeo</span><span class="status found">Exposed</span></div>
+      <div class="scan-row"><span class="name">WhitePages</span><span class="status req">Removal sent</span></div>
+      <div class="scan-row"><span class="name">BeenVerified</span><span class="status gone">Removed ✓</span></div>
+      <div class="scan-row"><span class="name">Intelius</span><span class="status found">Exposed</span></div>
+      <div class="scan-row"><span class="name">Radaris</span><span class="status req">Removal sent</span></div>
+      <div class="scan-row"><span class="name">TruthFinder</span><span class="status gone">Removed ✓</span></div>
+      <div style="margin-top:14px;font-size:.85rem;color:var(--slate-2);text-align:center">+ 41 more</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="soft">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">The problem</span>
+      <h2>Your private life is for sale — to anyone with $20.</h2>
+      <p>Data brokers vacuum up your records from courthouses, voter rolls, social media, and shopping habits, then resell the bundle to advertisers, scammers, stalkers, and AI scrapers. You never consented. You're not getting paid. And every month it gets worse.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2 4 4 8-8 4 4"/></svg>
+        </div>
+        <h3>You're in 200+ databases</h3>
+        <p>The average American adult appears in more than 200 data broker sites — most you've never heard of. They list your home address, phone, age, family, even property value.</p>
+      </div>
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        </div>
+        <h3>DIY takes 200+ hours</h3>
+        <p>Each broker has its own opt-out form, verification email, photo ID requirement, or fax-only process. They re-list you the moment you stop checking. It's designed to wear you down.</p>
+      </div>
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <h3>Spam, scams, and worse</h3>
+        <p>Robocalls, phishing texts, package theft, doxxing, identity theft, and stalkers all start the same way: someone bought your details from a broker for the price of a coffee.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">How it works</span>
+      <h2>Four steps. Then we do the rest forever.</h2>
+      <p>You give us your basics. We do the dirty work — and keep doing it every single month.</p>
+    </div>
+    <div class="grid grid-4">
+      <div class="card step">
+        <div class="num">1</div>
+        <h3>Tell us about you</h3>
+        <p>Name, current and previous addresses, phone, and email. Takes about 90 seconds. We use this only to find you on data broker sites.</p>
+      </div>
+      <div class="card step">
+        <div class="num">2</div>
+        <h3>We scan 200+ brokers</h3>
+        <p>Our scanners crawl every major people-search and data-broker site, matching your details to listings most folks don't know exist.</p>
+      </div>
+      <div class="card step">
+        <div class="num">3</div>
+        <h3>We file the removals</h3>
+        <p>For each match, we submit the legally-required opt-out request — by web form, email, or fax — and track every reply.</p>
+      </div>
+      <div class="card step">
+        <div class="num">4</div>
+        <h3>We watch forever</h3>
+        <p>Brokers love to re-add you. We re-scan every month and re-remove the second you reappear. You see everything in one dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAND -->
+<section class="soft tight">
+  <div class="container">
+    <div class="grid grid-4 center">
+      <div><div style="font-size:2.5rem;font-weight:800;color:var(--brand)">200+</div><p class="mt-1 mb-0">data brokers covered</p></div>
+      <div><div style="font-size:2.5rem;font-weight:800;color:var(--brand)">~47</div><p class="mt-1 mb-0">records found per person, avg.</p></div>
+      <div><div style="font-size:2.5rem;font-weight:800;color:var(--brand)">14 days</div><p class="mt-1 mb-0">avg. time to first removal</p></div>
+      <div><div style="font-size:2.5rem;font-weight:800;color:var(--brand)">monthly</div><p class="mt-1 mb-0">re-scans included on every plan</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Why people switch</span>
+      <h2>"I had no idea I was on that many sites."</h2>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <p style="font-size:1.05rem;color:var(--ink);font-style:italic">"My scan came back with 51 listings. I'd opted out of three of them myself last year and they were already back. Glad somebody else is babysitting this for me."</p>
+        <p class="mt-3 mb-0"><strong>— Marcus T.</strong>, Texas</p>
+      </div>
+      <div class="card">
+        <p style="font-size:1.05rem;color:var(--ink);font-style:italic">"I'm a nurse. A patient looked me up on one of those sites and showed up at my house. ID Delete got me off 38 brokers in three weeks. The peace of mind is worth every penny."</p>
+        <p class="mt-3 mb-0"><strong>— Rachel D.</strong>, Ohio</p>
+      </div>
+      <div class="card">
+        <p style="font-size:1.05rem;color:var(--ink);font-style:italic">"Robocalls dropped to almost zero by month two. Spam texts followed. I'm telling my whole family to sign up."</p>
+        <p class="mt-3 mb-0"><strong>— Janelle K.</strong>, Georgia</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING TEASER -->
+<section class="soft">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Pricing</span>
+      <h2>One price. We do the work.</h2>
+      <p>No upsells. No "extra removal" fees. No data sharing — ever.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card">
+        <h3>Personal</h3>
+        <div class="price-amt">$9<small>/mo</small></div>
+        <p class="muted mb-2">One person. Billed annually.</p>
+        <ul>
+          <li>200+ broker scans</li>
+          <li>Automatic removals</li>
+          <li>Monthly re-scans</li>
+          <li>Real-time dashboard</li>
+          <li class="no">Multiple people</li>
+        </ul>
+        <a class="btn btn-ghost btn-block" href="signup.html?plan=personal">Choose Personal</a>
+      </div>
+      <div class="price-card featured">
+        <span class="badge">Most popular</span>
+        <h3>Family</h3>
+        <div class="price-amt">$19<small>/mo</small></div>
+        <p class="muted mb-2">Up to 4 people. Billed annually.</p>
+        <ul>
+          <li>Everything in Personal</li>
+          <li>Up to 4 family members</li>
+          <li>Kids covered too</li>
+          <li>Family dashboard view</li>
+          <li>Priority removal queue</li>
+        </ul>
+        <a class="btn btn-primary btn-block" href="signup.html?plan=family">Choose Family</a>
+      </div>
+      <div class="price-card">
+        <h3>Pro</h3>
+        <div class="price-amt">$29<small>/mo</small></div>
+        <p class="muted mb-2">Executives, public figures, victims of stalking.</p>
+        <ul>
+          <li>Everything in Family</li>
+          <li>Weekly re-scans</li>
+          <li>500+ brokers (extended list)</li>
+          <li>Court-record suppression</li>
+          <li>1-on-1 privacy specialist</li>
+        </ul>
+        <a class="btn btn-ghost btn-block" href="signup.html?plan=pro">Choose Pro</a>
+      </div>
+    </div>
+    <p class="center mt-4 muted">All plans include a free initial exposure scan. Cancel any time.</p>
+  </div>
+</section>
+
+<!-- FAQ TEASER -->
+<section>
+  <div class="container container-narrow">
+    <div class="section-head">
+      <span class="eyebrow">Common questions</span>
+      <h2>Real talk.</h2>
+    </div>
+    <details class="faq-item">
+      <summary>Is this legal?</summary>
+      <p class="answer">Absolutely. State laws (CCPA in California, CDPA in Virginia, etc.) and the brokers' own published policies require them to remove your information when you ask. We just ask — at scale, on your behalf, in the right format, every single time.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Do you sell my data?</summary>
+      <p class="answer">No. We are literally a privacy company. We use your information only to identify you on broker sites and submit removals. We do not share it with advertisers, partners, AI training datasets, or anyone else. Ever.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How long until I disappear?</summary>
+      <p class="answer">Most brokers honor removals within 7–45 days. You'll see the first batch disappear in two weeks. After ~60 days, the majority are gone. Then we keep going monthly because brokers love to re-add you.</p>
+    </details>
+    <details class="faq-item">
+      <summary>What if a broker ignores the request?</summary>
+      <p class="answer">We escalate. Most states give us a legal cause of action against brokers who ignore valid deletion requests. Our specialists handle it; you don't have to do anything.</p>
+    </details>
+    <p class="center mt-4"><a href="faq.html" class="btn btn-ghost">See all questions →</a></p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="tight">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Find out who's selling you.</h2>
+      <p>Run a free exposure scan in 90 seconds. Find out exactly how many brokers have your name, address, and phone — no credit card required.</p>
+      <a class="btn btn-ghost btn-lg" href="signup.html">Run my free scan →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
+        <p class="tagline">We erase y'all from the internet's data brokers — automatically, continuously, for less than a streaming service.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <a href="how-it-works.html">How it works</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="data-brokers.html">Data brokers covered</a>
+        <a href="faq.html">FAQ</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="#">Press</a>
+        <a href="#">Careers</a>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <a href="privacy.html">Privacy policy</a>
+        <a href="terms.html">Terms of service</a>
+        <a href="#">Do not sell my info</a>
+        <a href="#">Security</a>
+      </div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 ID Delete, Inc. All rights reserved.</span>
+      <span>Made with care, in the southern style.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>

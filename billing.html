@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Billing — ID Delete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="logo" href="dashboard.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav>
+      <a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Overview</a>
+      <a href="scan.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/></svg>Exposure scan</a>
+      <a href="removals.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Removals</a>
+      <a href="settings.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+      <a href="billing.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>Billing</a>
+    </nav>
+    <div class="user">
+      <strong id="userName">—</strong>
+      <span id="userEmail">—</span>
+      <div style="margin-top:14px"><a href="#" data-action="logout" style="color:#94a3b8">Log out →</a></div>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <div class="topbar"><div><h1 class="mt-0">Billing</h1><p>Manage your plan and payment method.</p></div></div>
+
+    <div class="table-card" style="padding:28px;">
+      <h2 style="font-size:1.15rem">Current plan</h2>
+      <p class="muted">You are currently on the <strong style="color:var(--ink)" id="planName">—</strong> plan, billed annually.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-soft);border-radius:12px;padding:18px;margin-top:18px">
+        <div>
+          <div style="font-size:1.4rem;font-weight:800;color:var(--ink)" id="planPrice">—</div>
+          <div class="muted" id="planSummary">—</div>
+        </div>
+        <a class="btn btn-ghost" href="#" id="changePlan">Change plan</a>
+      </div>
+    </div>
+
+    <div class="table-card mt-4" style="padding:28px;">
+      <h2 style="font-size:1.15rem">Payment method</h2>
+      <div style="display:flex;align-items:center;gap:14px;background:var(--bg-soft);border-radius:12px;padding:18px;margin-top:14px">
+        <div style="background:white;border:1px solid var(--line);padding:8px 14px;border-radius:8px;font-weight:700;font-family:'Inter';">VISA</div>
+        <div><strong>•••• 4242</strong><div class="muted" style="font-size:.85rem">Expires 12/2029</div></div>
+        <a href="#" style="margin-left:auto" class="btn btn-ghost">Update card</a>
+      </div>
+      <p class="muted mt-2" style="font-size:.85rem">Payments processed securely by Stripe. Card details are never stored on our servers.</p>
+    </div>
+
+    <div class="table-card mt-4">
+      <div class="table-head"><h2>Invoices</h2></div>
+      <table>
+        <thead><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+        <tbody id="invoices"></tbody>
+      </table>
+    </div>
+
+    <!-- Plan picker modal-like -->
+    <div id="planModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;align-items:center;justify-content:center;padding:24px;">
+      <div style="background:white;max-width:560px;width:100%;border-radius:18px;padding:32px;box-shadow:var(--shadow-lg);">
+        <h2>Change your plan</h2>
+        <p class="muted">You'll be charged the prorated difference today.</p>
+        <div class="tier-picker mt-2">
+          <div class="tier-option" data-plan="personal"><div><div class="t-name">Personal</div><div class="t-desc">1 person · 200+ brokers</div></div><div class="t-price">$9/mo</div></div>
+          <div class="tier-option" data-plan="family"><div><div class="t-name">Family</div><div class="t-desc">Up to 4 people · 200+ brokers</div></div><div class="t-price">$19/mo</div></div>
+          <div class="tier-option" data-plan="pro"><div><div class="t-name">Pro</div><div class="t-desc">Up to 4 · 500+ · Weekly</div></div><div class="t-price">$29/mo</div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-ghost" id="closeModal" style="flex:1">Cancel</button>
+          <button class="btn btn-primary" id="confirmPlan" style="flex:1">Confirm change</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/api.js"></script>
+<script>
+(async () => {
+  await window.eyBackend.ready;
+  const u = await window.eyBackend.me();
+  if (!u) { location.href = 'login.html'; return; }
+  const billingCfg = await window.eyBackend.billingConfig();
+  document.getElementById('userName').textContent = u.name || u.email;
+  document.getElementById('userEmail').textContent = u.email;
+
+  const plans = {
+    personal: {name: 'Personal', price: '$108', monthly: '$9/mo', summary: '1 person · 200+ brokers · monthly re-scans'},
+    family:   {name: 'Family',   price: '$228', monthly: '$19/mo', summary: 'Up to 4 people · 200+ brokers · monthly re-scans'},
+    pro:      {name: 'Pro',      price: '$348', monthly: '$29/mo', summary: 'Up to 4 people · 500+ brokers · weekly re-scans · specialist'},
+  };
+  let plan = u.plan || 'family';
+  function refreshPlan() {
+    const p = plans[plan];
+    document.getElementById('planName').textContent = p.name;
+    document.getElementById('planPrice').textContent = `${p.price} / year · ${p.monthly}`;
+    document.getElementById('planSummary').textContent = p.summary;
+    document.querySelectorAll('#planModal .tier-option').forEach(o => o.classList.toggle('selected', o.dataset.plan === plan));
+  }
+  refreshPlan();
+
+  // Invoices (mocked from join date)
+  const start = new Date(u.joined || Date.now());
+  const invoices = [
+    {date: start.toISOString().slice(0,10), plan: plans[plan].name, amount: plans[plan].price, status: 'Paid'},
+  ];
+  document.getElementById('invoices').innerHTML = invoices.map(i =>
+    `<tr><td>${i.date}</td><td>${i.plan}</td><td>${i.amount}</td><td><span class="pill gone">${i.status}</span></td><td><a href="#">View</a></td></tr>`
+  ).join('');
+
+  // Modal
+  const modal = document.getElementById('planModal');
+  document.getElementById('changePlan').addEventListener('click', (e) => { e.preventDefault(); modal.style.display = 'flex'; });
+  document.getElementById('closeModal').addEventListener('click', () => modal.style.display = 'none');
+  modal.querySelectorAll('.tier-option').forEach(o => {
+    o.addEventListener('click', () => {
+      plan = o.dataset.plan;
+      modal.querySelectorAll('.tier-option').forEach(x => x.classList.toggle('selected', x.dataset.plan === plan));
+    });
+  });
+  document.getElementById('confirmPlan').addEventListener('click', async () => {
+    // If Stripe is configured, send the user to Checkout. Otherwise, update locally.
+    if (billingCfg.configured && window.eyBackend.mode === 'api') {
+      try {
+        await window.eyBackend.startCheckout(plan);
+        return;
+      } catch (err) {
+        alert('Could not start checkout: ' + err.message);
+      }
+    }
+    // Local fallback / no Stripe yet
+    if (window.eyBackend.mode === 'api') {
+      await window.eyBackend.updateProfile({ plan });
+    } else {
+      const u2 = window.eyAuth.getUser(); u2.plan = plan; window.eyAuth.setUser(u2);
+    }
+    modal.style.display = 'none';
+    refreshPlan();
+  });
+})();
+</script>
+</body>
+</html>
