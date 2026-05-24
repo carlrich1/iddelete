@@ -35,7 +35,7 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
-  margin: 0;
+  margin: 0; overflow-x: hidden;
   font-family: var(--font);
   color: var(--ink);
   background: var(--bg);
@@ -70,17 +70,12 @@ p  { color: var(--slate); margin: 0 0 1em; }
 }
 .logo {
   display: inline-flex; align-items: center; gap: 10px;
-  font-weight: 800; color: var(--ink); font-size: 1.15rem;
+  font-weight: 800; color: var(--ink); font-size: 1.4rem;
   letter-spacing: -.02em;
 }
 .logo:hover { text-decoration: none; }
-.logo-mark {
-  width: 32px; height: 32px; border-radius: 9px;
-  background: linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%);
-  display: inline-flex; align-items: center; justify-content: center;
-  color: white; font-weight: 800; font-size: .95rem;
-}
-.logo-mark::before { content: "ey"; letter-spacing: -.05em; }
+/* logo-mark removed — wordmark only */
+.logo-mark { display: none; }
 
 .nav { display: flex; align-items: center; gap: 28px; }
 .nav a { color: var(--slate); font-size: .95rem; font-weight: 500; }
@@ -156,7 +151,7 @@ p  { color: var(--slate); margin: 0 0 1em; }
   max-width: 540px;
 }
 .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
-.hero-trust { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 20px; color: var(--ink); font-size: 1rem; font-weight: 600; }
+.hero-trust { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 1rem; font-weight: 600; }
 .hero-trust span { display: inline-flex; align-items: center; gap: 8px; }
 .hero-trust svg { width: 20px; height: 20px; color: var(--good); flex-shrink: 0; }
 
@@ -185,6 +180,7 @@ p  { color: var(--slate); margin: 0 0 1em; }
 
 /* ---------- Sections ---------- */
 section { padding: 48px 0; }
+@media (max-width: 880px) { section { padding: 28px 0; } section.tight { padding: 20px 0; } .section-head { margin: 0 auto 18px; } }
 section.tight { padding: 32px 0; }
 section.soft { background: var(--bg-soft); }
 .section-head { text-align: center; max-width: 720px; margin: 0 auto 32px; }
@@ -305,7 +301,8 @@ section.soft { background: var(--bg-soft); }
 .form-card h1 { font-size: 1.65rem; margin-bottom: 8px; }
 .form-card .sub { color: var(--slate); margin-bottom: 24px; }
 label { display: block; font-weight: 600; font-size: .9rem; color: var(--ink); margin-bottom: 6px; }
-.field { margin-bottom: 16px; }
+.field { margin-bottom: 14px; }
+@media (max-width: 540px) { .field { margin-bottom: 10px; } .form-card { padding: 20px; } .form-card h1 { font-size: 1.35rem; } .form-card .sub { margin-bottom: 14px; } }
 input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select, textarea {
   width: 100%; padding: 12px 14px; font-size: 1rem; font-family: var(--font);
   border: 1px solid var(--line); border-radius: 10px; background: white;
@@ -358,12 +355,14 @@ input:focus, select:focus, textarea:focus {
 .app-main { padding: 32px 40px; background: var(--bg-soft); }
 @media (max-width: 880px) { .app-main { padding: 24px 20px; } }
 .app-main h1 { font-size: 1.75rem; }
-.app-main .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.app-main .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+@media (max-width: 540px) { .app-main .topbar { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 16px; } .app-main .topbar .btn { width: 100%; } .app-main h1 { font-size: 1.4rem; } }
 .app-main .topbar p { margin: 0; }
 
 /* Stats row */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
 @media (max-width: 880px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .stats { grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; } .stats .stat { padding: 14px; } }
 .stat {
   background: white; border: 1px solid var(--line); border-radius: 12px;
   padding: 20px; box-shadow: var(--shadow);
@@ -374,7 +373,7 @@ input:focus, select:focus, textarea:focus {
 .stat .delta.good { color: var(--good); }
 
 /* Tables */
-.table-card {
+.table-card { overflow-x: auto; /* prevents column overflow on phone */
   background: white; border: 1px solid var(--line); border-radius: 12px;
   padding: 0; box-shadow: var(--shadow); overflow: hidden;
 }
@@ -501,6 +500,11 @@ html {
 }
 
 /* Signup-page hero: three equal-weight headline lines stacked vertically. */
+@media (max-width: 540px) {
+  .signup-hero { margin: 0 0 14px; }
+  .form-card { padding-top: 14px; padding-bottom: 18px; }
+}
+/* (original block below) */
 .signup-hero {
   margin: 0 0 28px;
 }
@@ -519,10 +523,6 @@ html {
   .signup-hero-line { font-size: 1.4rem; }
 }
 
-/* Phone-only: drop the small ey square so the top bar fits the longer CTA label. */
-@media (max-width: 540px) {
-  .logo-mark { display: none; }
-}
 
 /* =====================================================================
    Mobile dashboard header — replaces the bulky sidebar on phone widths.
