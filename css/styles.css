@@ -156,9 +156,9 @@ p  { color: var(--slate); margin: 0 0 1em; }
   max-width: 540px;
 }
 .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
-.hero-trust { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 20px; color: var(--slate-2); font-size: .85rem; }
+.hero-trust { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 20px; color: var(--ink); font-size: 1rem; font-weight: 600; }
 .hero-trust span { display: inline-flex; align-items: center; gap: 8px; }
-.hero-trust svg { width: 18px; height: 18px; color: var(--good); }
+.hero-trust svg { width: 20px; height: 20px; color: var(--good); flex-shrink: 0; }
 
 .hero-visual {
   background: var(--bg-card); border: 1px solid var(--line);
@@ -517,4 +517,76 @@ html {
 }
 @media (max-width: 540px) {
   .signup-hero-line { font-size: 1.4rem; }
+}
+
+/* Phone-only: drop the small ey square so the top bar fits the longer CTA label. */
+@media (max-width: 540px) {
+  .logo-mark { display: none; }
+}
+
+/* =====================================================================
+   Mobile dashboard header — replaces the bulky sidebar on phone widths.
+   Shows logo (left) + initials button (right) that opens the full menu.
+   ===================================================================== */
+.dash-mobile { display: none; }
+.dash-mobile-menu { display: none; }
+@media (max-width: 880px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .app-shell .sidebar { display: none; }
+  .app-main { padding: 16px; }
+
+  .dash-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--line);
+    padding: 12px max(16px, env(safe-area-inset-left)) 12px max(16px, env(safe-area-inset-right));
+  }
+  .dash-mobile .logo { font-size: 1.1rem; }
+
+  .dash-mobile-user {
+    width: 40px; height: 40px;
+    border: none; border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%);
+    color: white; font-weight: 800; font-size: .85rem;
+    cursor: pointer; letter-spacing: 0;
+  }
+
+  .dash-mobile-menu {
+    display: block;
+    position: absolute;
+    top: 64px; right: 12px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    padding: 6px;
+    min-width: 240px;
+    z-index: 60;
+  }
+  .dash-mobile-menu[hidden] { display: none; }
+  .dash-mobile-menu a {
+    display: block;
+    padding: 12px 14px;
+    color: var(--ink);
+    font-weight: 500;
+    border-radius: 8px;
+    text-decoration: none;
+  }
+  .dash-mobile-menu a:hover { background: var(--bg-soft); }
+  .dash-mobile-menu a.active { background: #eef2ff; color: var(--brand); }
+  .dmm-user {
+    padding: 12px 14px;
+    margin: 6px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .dmm-user strong { display: block; color: var(--ink); font-size: .95rem; }
+  .dmm-user span { display: block; color: var(--slate); font-size: .8rem; margin-top: 2px; word-break: break-all; }
+  .dash-mobile-menu a.logout { color: var(--bad); }
 }

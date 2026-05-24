@@ -17,6 +17,26 @@
 </head>
 <body>
 
+<header class="dash-mobile">
+  <a class="logo" href="dashboard.html">ID Delete</a>
+  <button class="dash-mobile-user" aria-label="Open menu" aria-haspopup="true">
+    <span id="dmu-initials">--</span>
+  </button>
+  <div class="dash-mobile-menu" id="dmm" hidden>
+    <a href="dashboard.html" class="active">Overview</a>
+    <a href="scan.html">Exposure scan</a>
+    <a href="removals.html">Removals</a>
+    <a href="settings.html">Settings</a>
+    <a href="billing.html">Billing</a>
+    <div class="dmm-user">
+      <strong id="dmm-name">—</strong>
+      <span id="dmm-email">—</span>
+    </div>
+    <a href="#" class="logout" data-action="logout">Log out &rarr;</a>
+  </div>
+</header>
+
+
 <div class="app-shell">
   <aside class="sidebar">
     <a class="logo" href="dashboard.html"><span class="logo-mark"></span>ID Delete</a>
@@ -205,5 +225,6 @@
     });
   }
 </script>
+<script src="js/dash-mobile.js"></script>
 </body>
 </html>
