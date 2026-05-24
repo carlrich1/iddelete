@@ -82,21 +82,10 @@
 <script src="js/app.js"></script>
 <script src="js/api.js"></script>
 <script>
-  // Cloudflare Turnstile in invisible+execute mode — we trigger a fresh token
-  // per submit to avoid the classic "timeout-or-duplicate" reuse error.
+  // Cloudflare Turnstile — visible Managed widget (auto-validates on page load).
+  // On each submit we read the current token then reset() so the next attempt
+  // gets a fresh one. This avoids the single-use "timeout-or-duplicate" error.
   let __turnstileWidget = null;
-  window.__turnstileTokenResolve = null;
-  window.onTurnstileSuccess = (token) => {
-    if (window.__turnstileTokenResolve) {
-      window.__turnstileTokenResolve(token);
-      window.__turnstileTokenResolve = null;
-    }
-  };
-  window.onTurnstileExpired = () => {
-    if (window.turnstile && __turnstileWidget !== null) {
-      try { window.turnstile.reset(__turnstileWidget); } catch (_) {}
-    }
-  };
   (async () => {
     try {
       await window.eyBackend.ready;
@@ -105,18 +94,15 @@
       if (!sk) return;
       window.__turnstileSitekey = sk;
       const slot = document.getElementById('captcha-slot');
-      slot.innerHTML = '<div id="turnstile-widget" style="min-height:1px"></div>';
-      window.onloadTurnstileCallback = () => {
-        if (window.turnstile) {
-          __turnstileWidget = window.turnstile.render('#turnstile-widget', {
-            sitekey: sk,
-            size: 'invisible',
-            execution: 'execute',
-            callback: 'onTurnstileSuccess',
-            'expired-callback': 'onTurnstileExpired',
-            'error-callback': 'onTurnstileExpired',
-          });
-        }
+      slot.innerHTML = '<div id="turnstile-widget"></div>';
+      window.onloadTurnstileCallback = function () {
+        if (!window.turnstile) return;
+        __turnstileWidget = window.turnstile.render('#turnstile-widget', {
+          sitekey: sk,
+          theme: 'light',
+          'refresh-expired': 'auto',
+          'retry': 'auto',
+        });
       };
       const s = document.createElement('script');
       s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit';
@@ -125,14 +111,28 @@
     } catch (_) {}
   })();
 
-  async function freshCaptchaToken(timeoutMs = 8000) {
-    if (!window.turnstile || __turnstileWidget === null) return '';
+  // Wait until the Managed widget has a token, then return it AND reset so the
+  // next submit gets a brand-new one. Polls every 200ms up to timeoutMs.
+  async function freshCaptchaToken(timeoutMs = 15000) {
+    if (!window.__turnstileSitekey) return 'SKIP';  // captcha disabled server-side
     return new Promise((resolve) => {
-      let done = false;
-      window.__turnstileTokenResolve = (token) => { if (!done) { done = true; resolve(token || ''); } };
-      try { window.turnstile.reset(__turnstileWidget); } catch (_) {}
-      try { window.turnstile.execute(__turnstileWidget); } catch (_) {}
-      setTimeout(() => { if (!done) { done = true; resolve(''); } }, timeoutMs);
+      const start = Date.now();
+      const tick = () => {
+        let token = '';
+        try {
+          if (window.turnstile && __turnstileWidget !== null) {
+            token = window.turnstile.getResponse(__turnstileWidget) || '';
+          }
+        } catch (_) {}
+        if (token) {
+          try { window.turnstile.reset(__turnstileWidget); } catch (_) {}
+          resolve(token);
+          return;
+        }
+        if (Date.now() - start > timeoutMs) { resolve(''); return; }
+        setTimeout(tick, 200);
+      };
+      tick();
     });
   }
 
@@ -149,13 +149,14 @@
 
     let captcha_token = '';
     if (window.__turnstileSitekey) {
-      captcha_token = await freshCaptchaToken();
-      if (!captcha_token) {
+      const t = await freshCaptchaToken();
+      if (!t) {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Run my free scan →';
-        alert('We could not verify the CAPTCHA. Please reload and try again.');
+        alert('We could not verify the CAPTCHA. Please wait a moment and try again, or reload the page.');
         return;
       }
+      captcha_token = (t === 'SKIP') ? '' : t;
     }
 
     submitBtn.textContent = 'Running scan…';
