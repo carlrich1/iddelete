@@ -111,8 +111,9 @@
     } catch (_) {}
   })();
 
-  // Wait until the Managed widget has a token, then return it AND reset so the
-  // next submit gets a brand-new one. Polls every 200ms up to timeoutMs.
+  // Wait until the Managed widget has a valid token, then return it.
+  // IMPORTANT: do NOT reset() here — Cloudflare invalidates the token on reset,
+  // so we must wait until AFTER the backend verifies before resetting.
   async function freshCaptchaToken(timeoutMs = 15000) {
     if (!window.__turnstileSitekey) return 'SKIP';  // captcha disabled server-side
     return new Promise((resolve) => {
@@ -124,16 +125,20 @@
             token = window.turnstile.getResponse(__turnstileWidget) || '';
           }
         } catch (_) {}
-        if (token) {
-          try { window.turnstile.reset(__turnstileWidget); } catch (_) {}
-          resolve(token);
-          return;
-        }
+        if (token) { resolve(token); return; }
         if (Date.now() - start > timeoutMs) { resolve(''); return; }
         setTimeout(tick, 200);
       };
       tick();
     });
+  }
+
+  // Reset the widget so a fresh token will be generated for the next submit.
+  // Call this AFTER any backend call that consumed the previous token.
+  function resetCaptchaWidget() {
+    if (window.turnstile && __turnstileWidget !== null) {
+      try { window.turnstile.reset(__turnstileWidget); } catch (_) {}
+    }
   }
 
   // Plan choice is deferred until after the scan results — show on the
@@ -170,11 +175,18 @@
         plan,
         captcha_token,
       });
+      // Success — reset the widget so a fresh token is ready next time someone
+      // signs up from the same tab (rare, but cheap to do).
+      resetCaptchaWidget();
       window.location.href = 'dashboard.html?welcome=1';
     } catch (err) {
       const code = (err && err.message) || '';
-      // CAPTCHA failures get one silent retry with a fresh token
+      // Token has now been consumed by Cloudflare's siteverify (success or fail).
+      // Reset so the retry / next attempt picks up a brand-new token.
+      resetCaptchaWidget();
+      // Give Turnstile a moment to generate the new token before retrying.
       if (code.startsWith('captcha_') && !retried) {
+        await new Promise(r => setTimeout(r, 1500));
         return doSignup(true);
       }
       submitBtn.disabled = false;
