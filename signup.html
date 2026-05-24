@@ -82,53 +82,83 @@
 <script src="js/app.js"></script>
 <script src="js/api.js"></script>
 <script>
-  // Conditionally load Cloudflare Turnstile if the server reports a sitekey
+  // Cloudflare Turnstile in invisible+execute mode — we trigger a fresh token
+  // per submit to avoid the classic "timeout-or-duplicate" reuse error.
+  let __turnstileWidget = null;
+  window.__turnstileTokenResolve = null;
+  window.onTurnstileSuccess = (token) => {
+    if (window.__turnstileTokenResolve) {
+      window.__turnstileTokenResolve(token);
+      window.__turnstileTokenResolve = null;
+    }
+  };
+  window.onTurnstileExpired = () => {
+    if (window.turnstile && __turnstileWidget !== null) {
+      try { window.turnstile.reset(__turnstileWidget); } catch (_) {}
+    }
+  };
   (async () => {
     try {
       await window.eyBackend.ready;
       const cfg = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
       const sk = cfg.turnstile_sitekey;
       if (!sk) return;
+      window.__turnstileSitekey = sk;
       const slot = document.getElementById('captcha-slot');
-      slot.innerHTML = `<div class="cf-turnstile" data-sitekey="${sk}" data-appearance="always"></div>`;
+      slot.innerHTML = '<div id="turnstile-widget" style="min-height:1px"></div>';
+      window.onloadTurnstileCallback = () => {
+        if (window.turnstile) {
+          __turnstileWidget = window.turnstile.render('#turnstile-widget', {
+            sitekey: sk,
+            size: 'invisible',
+            execution: 'execute',
+            callback: 'onTurnstileSuccess',
+            'expired-callback': 'onTurnstileExpired',
+            'error-callback': 'onTurnstileExpired',
+          });
+        }
+      };
       const s = document.createElement('script');
-      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit';
       s.async = true; s.defer = true;
       document.head.appendChild(s);
     } catch (_) {}
   })();
+
+  async function freshCaptchaToken(timeoutMs = 8000) {
+    if (!window.turnstile || __turnstileWidget === null) return '';
+    return new Promise((resolve) => {
+      let done = false;
+      window.__turnstileTokenResolve = (token) => { if (!done) { done = true; resolve(token || ''); } };
+      try { window.turnstile.reset(__turnstileWidget); } catch (_) {}
+      try { window.turnstile.execute(__turnstileWidget); } catch (_) {}
+      setTimeout(() => { if (!done) { done = true; resolve(''); } }, timeoutMs);
+    });
+  }
 
   // Plan choice is deferred until after the scan results — show on the
   // dashboard once the user can see the value first. We start everyone on
   // the trial 'family' default; they'll pick a real plan later.
   const plan = 'family';
 
-  // Submit
-  document.getElementById('signup-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await window.eyBackend.ready;
-    const submitBtn = e.target.querySelector('button[type=submit]');
-    submitBtn.disabled = true; submitBtn.textContent = 'Running scan…';
+  // Submit. We grab a FRESH captcha token per attempt so we never reuse one,
+  // and on captcha errors we auto-retry once before bothering the user.
+  async function doSignup(retried) {
+    const submitBtn = document.querySelector('#signup-form button[type=submit]');
+    submitBtn.disabled = true; submitBtn.textContent = 'Verifying…';
 
-    // Grab the Turnstile token if the widget is present.
-    // Turnstile auto-injects a hidden input named "cf-turnstile-response"; we also
-    // try window.turnstile.getResponse() in case the script hasn't auto-bound yet.
     let captcha_token = '';
-    try {
-      const hidden = document.querySelector('input[name="cf-turnstile-response"]');
-      if (hidden && hidden.value) captcha_token = hidden.value;
-      if (!captcha_token && window.turnstile) {
-        captcha_token = window.turnstile.getResponse() || '';
-      }
-      const widget = document.querySelector('.cf-turnstile');
-      if (widget && !captcha_token) {
+    if (window.__turnstileSitekey) {
+      captcha_token = await freshCaptchaToken();
+      if (!captcha_token) {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Run my free scan →';
-        alert('Please complete the CAPTCHA challenge to continue.');
+        alert('We could not verify the CAPTCHA. Please reload and try again.');
         return;
       }
-    } catch (_) {}
+    }
 
+    submitBtn.textContent = 'Running scan…';
     try {
       await window.eyBackend.signup({
         name: document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value,
@@ -141,18 +171,27 @@
       });
       window.location.href = 'dashboard.html?welcome=1';
     } catch (err) {
+      const code = (err && err.message) || '';
+      // CAPTCHA failures get one silent retry with a fresh token
+      if (code.startsWith('captcha_') && !retried) {
+        return doSignup(true);
+      }
       submitBtn.disabled = false;
       submitBtn.textContent = 'Run my free scan →';
-      if (window.turnstile) { try { window.turnstile.reset(); } catch(_) {} }
-      const code = err.message || '';
       const msg = code === 'email_in_use' ? 'That email is already registered.' :
                   code === 'password_too_short' ? 'Password must be at least 8 characters.' :
                   code === 'invalid_email' ? 'Please enter a valid email.' :
                   code === 'rate_limited' ? 'Too many signup attempts. Please wait 15 minutes and try again.' :
-                  code.startsWith('captcha_') ? 'CAPTCHA verification failed. Please try again.' :
+                  code.startsWith('captcha_') ? 'CAPTCHA verification failed. Please reload the page and try again.' :
                   'Signup failed. Please try again.';
       alert(msg);
     }
+  }
+
+  document.getElementById('signup-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await window.eyBackend.ready;
+    doSignup(false);
   });
 </script>
 
