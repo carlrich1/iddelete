@@ -117,28 +117,51 @@ def verify_captcha(token: str) -> tuple[bool, str | None]:
     We deliberately do NOT send ``remoteip`` — behind Railway's proxy chain
     the IP we'd derive doesn't always match the IP that solved the challenge,
     which Cloudflare treats as a soft-fail signal. The token alone is enough.
+
+    On failure we encode HTTP status + Cloudflare error-codes into the returned
+    error string, so the frontend alert lets us diagnose mismatched secrets,
+    wrong-hostname keys, or token expiration without grepping server logs.
     """
     if not is_captcha_enabled():
         return True, None
     if not token:
         return False, "captcha_missing"
     secret = os.environ.get("TURNSTILE_SECRET", "")
+    # Sanity check on the secret shape — Cloudflare Turnstile secret keys
+    # always start with "0x" (hex-prefixed). If yours doesn't, you've either
+    # pasted the sitekey (starts "0x" too, but is shorter and meant for the
+    # frontend) or an hCaptcha leftover. Surface that immediately.
+    if not secret.startswith("0x"):
+        log.error("TURNSTILE_SECRET does not look like a Turnstile secret "
+                  "(should start with '0x'). Got prefix=%r len=%d",
+                  secret[:4], len(secret))
+        return False, "captcha_misconfigured"
     try:
         resp = requests.post(
             TURNSTILE_VERIFY_URL,
             data={"secret": secret, "response": token},
             timeout=10,
         )
-        body = resp.json() if resp.ok else {}
+        status = resp.status_code
+        try:
+            body = resp.json()
+        except Exception:
+            body = {"_raw": resp.text[:200]}
     except Exception as e:
         log.warning("Turnstile verification request failed: %s", e)
         return False, "captcha_unreachable"
     if body.get("success"):
-        log.info("Turnstile verify OK (hostname=%s)", body.get("hostname"))
+        log.info("Turnstile verify OK (hostname=%s status=%s)",
+                 body.get("hostname"), status)
         return True, None
     codes = body.get("error-codes") or []
-    log.warning("Turnstile verify FAILED codes=%s body=%s", codes, body)
-    return False, ("captcha_invalid:" + ",".join(codes)) if codes else "captcha_invalid"
+    log.warning("Turnstile verify FAILED status=%s codes=%s body=%s",
+                status, codes, body)
+    if codes:
+        # Drop colons/spaces from codes so the response stays parseable.
+        flat = ",".join(str(c) for c in codes)
+        return False, f"captcha_invalid:{flat}"
+    return False, f"captcha_invalid:http_{status}"
 
 
 # Backwards-compat alias so auth.py keeps importing the old name.
