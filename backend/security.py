@@ -112,7 +112,12 @@ def is_captcha_enabled() -> bool:
 
 def verify_captcha(token: str) -> tuple[bool, str | None]:
     """Returns (ok, error_code). When captcha is disabled, returns (True, None)
-    so callers can use ``if not verify_captcha(t)[0]: ...`` unconditionally."""
+    so callers can use ``if not verify_captcha(t)[0]: ...`` unconditionally.
+
+    We deliberately do NOT send ``remoteip`` — behind Railway's proxy chain
+    the IP we'd derive doesn't always match the IP that solved the challenge,
+    which Cloudflare treats as a soft-fail signal. The token alone is enough.
+    """
     if not is_captcha_enabled():
         return True, None
     if not token:
@@ -121,11 +126,7 @@ def verify_captcha(token: str) -> tuple[bool, str | None]:
     try:
         resp = requests.post(
             TURNSTILE_VERIFY_URL,
-            data={
-                "secret": secret,
-                "response": token,
-                "remoteip": _client_ip(),
-            },
+            data={"secret": secret, "response": token},
             timeout=10,
         )
         body = resp.json() if resp.ok else {}
@@ -133,8 +134,10 @@ def verify_captcha(token: str) -> tuple[bool, str | None]:
         log.warning("Turnstile verification request failed: %s", e)
         return False, "captcha_unreachable"
     if body.get("success"):
+        log.info("Turnstile verify OK (hostname=%s)", body.get("hostname"))
         return True, None
     codes = body.get("error-codes") or []
+    log.warning("Turnstile verify FAILED codes=%s body=%s", codes, body)
     return False, ("captcha_invalid:" + ",".join(codes)) if codes else "captcha_invalid"
 
 

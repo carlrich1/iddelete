@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ID Delete">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="description" content="Free dark web breach scan. Check if your email and passwords have been exposed in any of 800+ known data breaches.">
+<title>Dark web scan — ID Delete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+
+<style>
+  /* ---- Dark-web-scan page only ---- */
+  .dws-scan-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    padding: 28px;
+  }
+  .dws-scan-card label {
+    font-size: .85rem;
+    color: var(--slate-2);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .dws-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .dws-input-row input[type="email"] {
+    flex: 1;
+    margin: 0;
+  }
+  .dws-input-row .btn {
+    flex-shrink: 0;
+  }
+  @media (max-width: 540px) {
+    .dws-input-row { flex-direction: column; }
+    .dws-input-row .btn { width: 100%; }
+  }
+  .dws-trust-row {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    color: var(--slate);
+    font-size: .85rem;
+  }
+  .dws-trust-row span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dws-trust-row svg {
+    width: 14px;
+    height: 14px;
+    color: var(--good);
+    flex-shrink: 0;
+  }
+
+  /* Status line under the input while scanning */
+  .dws-status {
+    min-height: 22px;
+    margin-top: 14px;
+    color: var(--slate);
+    font-size: .9rem;
+  }
+  .dws-status.scanning::after {
+    content: '...';
+    animation: dws-dots 1.5s steps(4) infinite;
+  }
+  @keyframes dws-dots {
+    0%   { content: ''; }
+    25%  { content: '.'; }
+    50%  { content: '..'; }
+    75%  { content: '...'; }
+  }
+  .dws-status.error { color: var(--bad); }
+
+  /* Results region */
+  #dws-results { margin-top: 28px; }
+  .dws-clean {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #14532d;
+    border-radius: 14px;
+    padding: 28px;
+    text-align: center;
+  }
+  .dws-clean .dws-check {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--good);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+  .dws-clean h3 { color: #14532d; margin-bottom: 6px; }
+  .dws-clean p { color: #14532d; opacity: .85; margin: 0; }
+
+  /* Breach card */
+  .dws-breach {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--bad);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .dws-breach h3 {
+    margin-bottom: 4px;
+    font-size: 1.1rem;
+  }
+  .dws-breach .meta {
+    color: var(--slate-2);
+    font-size: .85rem;
+    margin-bottom: 12px;
+  }
+  .dws-breach .desc {
+    color: var(--slate);
+    font-size: .92rem;
+    margin-bottom: 12px;
+    line-height: 1.55;
+  }
+  .dws-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .dws-tag {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: var(--bad);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 600;
+  }
+
+  /* Sample (illustrative) panel in the hero */
+  .dws-sample {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    padding: 16px;
+  }
+  .dws-sample-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .dws-sample-head strong { color: var(--ink); }
+  .dws-sample-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--bg-soft);
+    margin-bottom: 6px;
+    font-size: .9rem;
+  }
+  .dws-sample-row .src { font-weight: 600; color: var(--ink); }
+  .dws-sample-row .yr  { color: var(--slate-2); font-size: .82rem; }
+
+  /* Make hero grid feel right on this page */
+  .hero-grid.dws-hero-grid {
+    grid-template-columns: 1.15fr .85fr;
+  }
+  @media (max-width: 880px) {
+    .hero-grid.dws-hero-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container inner">
+    <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
+    <nav class="nav">
+      <a href="how-it-works.html">How it works</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="data-brokers.html">Data brokers</a>
+      <a href="dark-web-scan.html">Dark web scan</a>
+      <a href="faq.html">FAQ</a>
+      <a href="about.html">About</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="login.html" data-when="loggedout">Log in</a>
+      <a class="btn btn-primary" href="signup.html" data-when="loggedout">Start my free scan</a>
+      <a class="btn btn-primary" href="dashboard.html" data-when="loggedin" style="display:none">Open dashboard</a>
+      <button class="menu-toggle" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO + SCAN -->
+<section class="hero">
+  <div class="container hero-grid dws-hero-grid">
+    <div>
+      <h1>Has your email shown up in a data breach?</h1>
+      <p class="sub">
+        We check your email address against 800+ known breaches and paste-site dumps — the same database law-enforcement and security teams use. Free, instant, anonymous. No account required.
+      </p>
+
+      <div class="dws-scan-card" style="margin-top:22px">
+        <label for="dws-email">Check an email address</label>
+        <div class="dws-input-row">
+          <input type="email" id="dws-email" placeholder="you@example.com" autocomplete="email" inputmode="email">
+          <button class="btn btn-primary btn-lg" id="dws-scan-btn">Scan now</button>
+        </div>
+        <div class="dws-trust-row">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Free</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> No account needed</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> We never store your email</span>
+        </div>
+        <div class="dws-status" id="dws-status"></div>
+      </div>
+
+      <div id="dws-results"></div>
+    </div>
+
+    <div class="dws-sample" aria-hidden="true">
+      <div class="dws-sample-head">
+        <strong>What we check against</strong>
+        <span class="status req" style="font-size:.72rem;padding:4px 10px;border-radius:999px;">800+ breaches</span>
+      </div>
+      <div class="dws-sample-row"><span class="src">LinkedIn</span><span class="yr">700M records · 2021</span></div>
+      <div class="dws-sample-row"><span class="src">Adobe</span><span class="yr">153M records · 2013</span></div>
+      <div class="dws-sample-row"><span class="src">MyFitnessPal</span><span class="yr">143M records · 2018</span></div>
+      <div class="dws-sample-row"><span class="src">Dropbox</span><span class="yr">68M records · 2012</span></div>
+      <div class="dws-sample-row"><span class="src">Canva</span><span class="yr">137M records · 2019</span></div>
+      <div style="margin-top:10px;font-size:.78rem;color:var(--slate-2);text-align:center">
+        + paste-site dumps, credential stuffing lists, and more
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE TELL YOU -->
+<section class="soft">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">What you'll see</span>
+      <h2>The truth about your exposure — no scare tactics.</h2>
+      <p>Most "dark web monitoring" services pretend they can remove your data from the dark web. They can't, and we won't lie to you. What we <em>can</em> do is tell you exactly what's out there so you can change the passwords that matter.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </div>
+        <h3>Every breach you're in</h3>
+        <p>Each company that lost your data, when it happened, how many accounts were affected, and what type of records leaked.</p>
+      </div>
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <h3>What data was exposed</h3>
+        <p>Email, password, phone, address, security questions — we list exactly which fields leaked from each breach so you know what to rotate.</p>
+      </div>
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <h3>What to do about it</h3>
+        <p>For each breach we'll tell you exactly which password to change first. Then we'll handle the data brokers selling your details every day after that.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HONESTY SECTION -->
+<section>
+  <div class="container container-narrow">
+    <div class="section-head">
+      <span class="eyebrow">What this is not</span>
+      <h2>We don't "remove your data from the dark web."</h2>
+      <p>Nobody can. Once a breach dump is on a paste site, a Telegram channel, or a Russian forum, it's copied 10,000 times within hours. Services that claim removal are selling you a placebo. We tell you what's exposed so you can rotate the passwords, freeze the credit, and shut down the attack vectors that actually matter — and then we keep the data brokers from feeding the next breach.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="tight">
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Now stop feeding the next breach.</h2>
+      <p>The dark web scan tells you what's already out. ID Delete pulls your name, address, phone, and family off the 200+ data brokers that sell it — automatically, every month. Less than a streaming subscription.</p>
+      <a class="btn btn-ghost btn-lg" href="signup.html">Start my free broker scan →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
+        <p class="tagline">We erase y'all from the internet's data brokers — automatically, continuously, for less than a streaming service.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <a href="how-it-works.html">How it works</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="data-brokers.html">Data brokers covered</a>
+        <a href="dark-web-scan.html">Dark web scan</a>
+        <a href="faq.html">FAQ</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="#">Press</a>
+        <a href="#">Careers</a>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <a href="privacy.html">Privacy policy</a>
+        <a href="terms.html">Terms of service</a>
+        <a href="#">Do not sell my info</a>
+        <a href="#">Security</a>
+      </div>
+    </div>
+    <div class="copyright">
+      <span>&copy; 2026 ID Delete, Inc. All rights reserved.</span>
+      <span>Made with care, in the southern style.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+
+<script>
+  // ============================================================
+  // Dark web scan — talks to the DarkTrace HIBP proxy Worker.
+  // The Worker is at darktrace-hibp-proxy.wcr1968.workers.dev
+  // and keeps the HIBP API key server-side.
+  // ============================================================
+  const DWS_WORKER = 'https://darktrace-hibp-proxy.wcr1968.workers.dev';
+
+  const emailEl   = document.getElementById('dws-email');
+  const btnEl     = document.getElementById('dws-scan-btn');
+  const statusEl  = document.getElementById('dws-status');
+  const resultsEl = document.getElementById('dws-results');
+
+  emailEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); scan(); }
+  });
+  btnEl.addEventListener('click', scan);
+
+  function setStatus(text, mode) {
+    statusEl.textContent = text;
+    statusEl.className = 'dws-status' + (mode ? ' ' + mode : '');
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+  function stripHtml(s) {
+    const d = document.createElement('div');
+    d.innerHTML = s || '';
+    return d.textContent || d.innerText || '';
+  }
+  function fmtNum(n) {
+    return typeof n === 'number' ? n.toLocaleString('en-US') : '—';
+  }
+
+  async function scan() {
+    const email = (emailEl.value || '').trim();
+    if (!email) { setStatus('Enter an email address.', 'error'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setStatus('That doesn’t look like a valid email.', 'error');
+      return;
+    }
+
+    btnEl.disabled = true;
+    resultsEl.innerHTML = '';
+    setStatus('Scanning breach databases', 'scanning');
+
+    try {
+      const encoded = encodeURIComponent(email);
+      const [breachesRes, pastesRes] = await Promise.all([
+        fetch(`${DWS_WORKER}/breachedaccount/${encoded}`),
+        fetch(`${DWS_WORKER}/pasteaccount/${encoded}`),
+      ]);
+
+      if (!breachesRes.ok && breachesRes.status !== 200) {
+        throw new Error(`Scanner returned ${breachesRes.status}`);
+      }
+
+      const breaches  = await breachesRes.json();
+      const pastes    = pastesRes.ok ? await pastesRes.json() : [];
+      const breachArr = Array.isArray(breaches) ? breaches : [];
+      const pasteArr  = Array.isArray(pastes)   ? pastes   : [];
+
+      render(email, breachArr, pasteArr);
+      setStatus(`Scan complete · ${breachArr.length} breach(es), ${pasteArr.length} paste(s).`);
+    } catch (err) {
+      console.error(err);
+      resultsEl.innerHTML = `<div class="alert warn" style="margin-top:20px">
+        <span>We couldn’t complete the scan: ${escapeHtml(err.message)}. Try again in a few seconds.</span>
+      </div>`;
+      setStatus('Scan failed.', 'error');
+    } finally {
+      btnEl.disabled = false;
+    }
+  }
+
+  function render(email, breaches, pastes) {
+    if (breaches.length === 0 && pastes.length === 0) {
+      resultsEl.innerHTML = `
+        <div class="dws-clean">
+          <div class="dws-check">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <h3>No breaches found</h3>
+          <p>We didn’t find <strong>${escapeHtml(email)}</strong> in any known breach. That’s the good news. The bad news: data brokers are still selling your address and phone. <a href="signup.html" style="color:#14532d;text-decoration:underline">Run a broker scan &rarr;</a></p>
+        </div>
+      `;
+      return;
+    }
+
+    const dataClasses = new Set();
+    breaches.forEach(b => (b.DataClasses || []).forEach(dc => dataClasses.add(dc)));
+
+    const stats = `
+      <div class="stats" style="margin-bottom:20px;margin-top:8px">
+        <div class="stat">
+          <div class="label">Breaches</div>
+          <div class="val" style="color:${breaches.length > 0 ? 'var(--bad)' : 'var(--good)'}">${breaches.length}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Pastes</div>
+          <div class="val" style="color:${pastes.length > 0 ? 'var(--bad)' : 'var(--good)'}">${pastes.length}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Data types exposed</div>
+          <div class="val" style="color:var(--bad)">${dataClasses.size}</div>
+        </div>
+      </div>
+    `;
+
+    const sorted = [...breaches].sort((a, b) =>
+      (b.BreachDate || '').localeCompare(a.BreachDate || '')
+    );
+
+    const cards = sorted.map(b => `
+      <div class="dws-breach">
+        <h3>${escapeHtml(b.Title || b.Name)}</h3>
+        <div class="meta">Breached ${escapeHtml(b.BreachDate || 'unknown')} · ${fmtNum(b.PwnCount)} accounts affected</div>
+        <div class="desc">${escapeHtml(stripHtml(b.Description || '').slice(0, 320))}${(b.Description || '').length > 320 ? '…' : ''}</div>
+        <div class="dws-tags">
+          ${(b.DataClasses || []).map(dc => `<span class="dws-tag">${escapeHtml(dc)}</span>`).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    const upsell = `
+      <div class="alert info" style="margin-top:18px">
+        <span><strong>You can’t scrub a leaked password from the internet</strong> — but you can change it everywhere it was reused, freeze your credit, and stop data brokers from selling your address to the next attacker.
+        <a href="signup.html" style="color:#1e40af;font-weight:700"> Start with a free broker scan &rarr;</a></span>
+      </div>
+    `;
+
+    resultsEl.innerHTML = stats + cards + upsell;
+  }
+</script>
+
+<script>
+  // Register the service worker in production-ish contexts (not file://)
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>

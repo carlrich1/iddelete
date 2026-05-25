@@ -1,8 +1,9 @@
 /* ID Delete service worker — minimal offline-capable shell.
-   Caches the static frontend so the app loads when the network blips.
-   Network-first for API calls so user data is always fresh. */
+   - Network-first for HTML so users always get the latest pages.
+   - Network-first for /api/ so user data is always fresh.
+   - Stale-while-revalidate for static assets (CSS/JS/images). */
 
-const CACHE = 'iddelete-v1';
+const CACHE = 'iddelete-v3';
 const SHELL = [
   '/', '/index.html', '/dashboard.html', '/login.html',
   '/signup.html', '/css/styles.css', '/js/app.js', '/js/api.js',
@@ -25,6 +26,14 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+function isHtmlRequest(req, url) {
+  if (req.mode === 'navigate') return true;
+  const accept = req.headers.get('accept') || '';
+  if (accept.includes('text/html')) return true;
+  if (url.pathname.endsWith('.html') || url.pathname === '/') return true;
+  return false;
+}
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   // Only handle GETs; let POSTs (login, scan, etc.) pass through untouched.
@@ -32,15 +41,30 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
 
-  // Network-first for API + auth so we don't serve stale dashboard data
+  // Never intercept Cloudflare Turnstile (cross-origin captcha challenges).
+  if (url.hostname === 'challenges.cloudflare.com') return;
+
+  // Network-first for API + auth so we don't serve stale dashboard data.
   if (url.pathname.startsWith('/api/')) {
+    event.respondWith(fetch(req).catch(() => caches.match(req)));
+    return;
+  }
+
+  // Network-first for HTML so every page load gets the latest deploy.
+  if (isHtmlRequest(req, url)) {
     event.respondWith(
-      fetch(req).catch(() => caches.match(req))
+      fetch(req).then((resp) => {
+        if (resp && resp.ok && resp.type === 'basic') {
+          const copy = resp.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
+        return resp;
+      }).catch(() => caches.match(req))
     );
     return;
   }
 
-  // Stale-while-revalidate for everything else
+  // Stale-while-revalidate for static assets (CSS/JS/images/icons).
   event.respondWith(
     caches.match(req).then((cached) => {
       const fetched = fetch(req).then((resp) => {

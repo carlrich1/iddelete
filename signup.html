@@ -22,6 +22,7 @@
     <a class="logo" href="index.html"><span class="logo-mark"></span>ID Delete</a>
     <nav class="nav">
       <a href="how-it-works.html">How it works</a><a href="pricing.html">Pricing</a><a href="data-brokers.html">Data brokers</a><a href="faq.html">FAQ</a><a href="about.html">About</a>
+      <a href="dark-web-scan.html">Dark web scan</a>
     </nav>
     <div class="nav-cta">
       <a class="btn btn-ghost" href="login.html">Log in</a>
@@ -79,66 +80,102 @@
   </div>
 </section>
 
-<script src="js/app.js"></script>
-<script src="js/api.js"></script>
+<script src="js/app.js?v=3"></script>
+<script src="js/api.js?v=3"></script>
 <script>
-  // Cloudflare Turnstile — visible Managed widget (auto-validates on page load).
-  // On each submit we read the current token then reset() so the next attempt
-  // gets a fresh one. This avoids the single-use "timeout-or-duplicate" error.
+  // Cloudflare Turnstile — EXECUTE MODE.
+  // The widget renders but does NOT solve until we call turnstile.execute().
+  // We trigger that on form submit, then wait for the callback to fire with
+  // a brand-new token. This avoids every stale-token / reset-timing pitfall
+  // (single-use, 5-min expiry, double-reset, widget-still-verifying, etc).
   let __turnstileWidget = null;
+  let __pendingTokenResolve = null;
+  let __pendingTokenReject  = null;
+
   (async () => {
     try {
       await window.eyBackend.ready;
       const cfg = await fetch('/api/config').then(r => r.json()).catch(() => ({}));
       const sk = cfg.turnstile_sitekey;
-      if (!sk) return;
+      if (!sk) { console.info('[captcha] disabled server-side (no sitekey)'); return; }
       window.__turnstileSitekey = sk;
+
+      // Render slot for the widget. With appearance:'interaction-only' the
+      // widget stays hidden until a human-check is actually needed.
       const slot = document.getElementById('captcha-slot');
       slot.innerHTML = '<div id="turnstile-widget"></div>';
+
       window.onloadTurnstileCallback = function () {
-        if (!window.turnstile) return;
+        if (!window.turnstile) { console.warn('[captcha] turnstile global missing'); return; }
         __turnstileWidget = window.turnstile.render('#turnstile-widget', {
           sitekey: sk,
           theme: 'light',
-          'refresh-expired': 'auto',
-          'retry': 'auto',
+          execution: 'execute',           // wait for explicit .execute() call
+          appearance: 'interaction-only', // hide widget until interaction needed
+          callback: function (token) {
+            console.info('[captcha] token issued (len ' + (token||'').length + ')');
+            if (__pendingTokenResolve) {
+              const r = __pendingTokenResolve;
+              __pendingTokenResolve = __pendingTokenReject = null;
+              r(token);
+            }
+          },
+          'error-callback': function (err) {
+            console.warn('[captcha] error-callback:', err);
+            if (__pendingTokenReject) {
+              const r = __pendingTokenReject;
+              __pendingTokenResolve = __pendingTokenReject = null;
+              r(new Error('captcha_error:' + (err || 'unknown')));
+            }
+          },
+          'timeout-callback': function () {
+            console.warn('[captcha] timeout-callback');
+            if (__pendingTokenReject) {
+              const r = __pendingTokenReject;
+              __pendingTokenResolve = __pendingTokenReject = null;
+              r(new Error('captcha_timeout'));
+            }
+          },
         });
+        console.info('[captcha] widget rendered (execute mode)');
       };
+
       const s = document.createElement('script');
       s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit';
       s.async = true; s.defer = true;
+      s.onerror = () => console.error('[captcha] turnstile script failed to load');
       document.head.appendChild(s);
-    } catch (_) {}
+    } catch (e) {
+      console.error('[captcha] init failed:', e);
+    }
   })();
 
-  // Wait until the Managed widget has a valid token, then return it.
-  // IMPORTANT: do NOT reset() here — Cloudflare invalidates the token on reset,
-  // so we must wait until AFTER the backend verifies before resetting.
-  async function freshCaptchaToken(timeoutMs = 15000) {
-    if (!window.__turnstileSitekey) return 'SKIP';  // captcha disabled server-side
-    return new Promise((resolve) => {
-      const start = Date.now();
-      const tick = () => {
-        let token = '';
-        try {
-          if (window.turnstile && __turnstileWidget !== null) {
-            token = window.turnstile.getResponse(__turnstileWidget) || '';
-          }
-        } catch (_) {}
-        if (token) { resolve(token); return; }
-        if (Date.now() - start > timeoutMs) { resolve(''); return; }
-        setTimeout(tick, 200);
-      };
-      tick();
-    });
-  }
-
-  // Reset the widget so a fresh token will be generated for the next submit.
-  // Call this AFTER any backend call that consumed the previous token.
-  function resetCaptchaWidget() {
-    if (window.turnstile && __turnstileWidget !== null) {
-      try { window.turnstile.reset(__turnstileWidget); } catch (_) {}
+  // Trigger a fresh challenge and wait for the callback to give us the token.
+  // Always returns a brand-new token (or throws), because we reset() FIRST
+  // and Cloudflare regenerates a fresh one in response to execute().
+  function requestFreshToken(timeoutMs = 30000) {
+    if (!window.__turnstileSitekey) return Promise.resolve('SKIP');
+    if (!window.turnstile || __turnstileWidget === null) {
+      return Promise.reject(new Error('captcha_not_ready'));
     }
+    return new Promise((resolve, reject) => {
+      __pendingTokenResolve = resolve;
+      __pendingTokenReject  = reject;
+      // reset() so we guarantee a fresh token; execute() then triggers it.
+      try { window.turnstile.reset(__turnstileWidget); } catch (_) {}
+      try { window.turnstile.execute(__turnstileWidget); }
+      catch (e) {
+        __pendingTokenResolve = __pendingTokenReject = null;
+        reject(new Error('captcha_execute_failed'));
+        return;
+      }
+      setTimeout(() => {
+        if (__pendingTokenReject) {
+          __pendingTokenResolve = __pendingTokenReject = null;
+          reject(new Error('captcha_timeout'));
+        }
+      }, timeoutMs);
+    });
   }
 
   // Plan choice is deferred until after the scan results — show on the
@@ -146,22 +183,22 @@
   // the trial 'family' default; they'll pick a real plan later.
   const plan = 'family';
 
-  // Submit. We grab a FRESH captcha token per attempt so we never reuse one,
-  // and on captcha errors we auto-retry once before bothering the user.
   async function doSignup(retried) {
     const submitBtn = document.querySelector('#signup-form button[type=submit]');
     submitBtn.disabled = true; submitBtn.textContent = 'Verifying…';
 
     let captcha_token = '';
     if (window.__turnstileSitekey) {
-      const t = await freshCaptchaToken();
-      if (!t) {
+      try {
+        const t = await requestFreshToken();
+        captcha_token = (t === 'SKIP') ? '' : t;
+      } catch (e) {
+        console.warn('[captcha] could not get token:', e && e.message);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Run my free scan →';
-        alert('We could not verify the CAPTCHA. Please wait a moment and try again, or reload the page.');
+        alert('CAPTCHA could not be verified (' + ((e && e.message) || 'unknown') + '). Please try again. If it keeps failing, reload the page.');
         return;
       }
-      captcha_token = (t === 'SKIP') ? '' : t;
     }
 
     submitBtn.textContent = 'Running scan…';
@@ -175,18 +212,13 @@
         plan,
         captcha_token,
       });
-      // Success — reset the widget so a fresh token is ready next time someone
-      // signs up from the same tab (rare, but cheap to do).
-      resetCaptchaWidget();
       window.location.href = 'dashboard.html?welcome=1';
     } catch (err) {
       const code = (err && err.message) || '';
-      // Token has now been consumed by Cloudflare's siteverify (success or fail).
-      // Reset so the retry / next attempt picks up a brand-new token.
-      resetCaptchaWidget();
-      // Give Turnstile a moment to generate the new token before retrying.
+      console.warn('[signup] backend error:', code);
+      // On any captcha-side failure, auto-retry ONCE with a fresh token.
       if (code.startsWith('captcha_') && !retried) {
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise(r => setTimeout(r, 800));
         return doSignup(true);
       }
       submitBtn.disabled = false;
@@ -195,7 +227,7 @@
                   code === 'password_too_short' ? 'Password must be at least 8 characters.' :
                   code === 'invalid_email' ? 'Please enter a valid email.' :
                   code === 'rate_limited' ? 'Too many signup attempts. Please wait 15 minutes and try again.' :
-                  code.startsWith('captcha_') ? 'CAPTCHA verification failed. Please reload the page and try again.' :
+                  code.startsWith('captcha_') ? ('CAPTCHA verification failed (' + code + '). Please reload the page and try again.') :
                   'Signup failed. Please try again.';
       alert(msg);
     }

@@ -1,0 +1,8 @@
+name = "darktrace-hibp-proxy"
+main = "src/index.js"
+compatibility_date = "2026-04-15"
+
+[vars]
+# Comma-separated allowlist of origins permitted to call this Worker.
+# Use "*" only for dev. Localhost entries cover backend/run.bat/sh dev mode.
+ALLOWED_ORIGIN = "https://iddelete.com,https://www.iddelete.com,http://127.0.0.1:5000,http://localhost:5000"
